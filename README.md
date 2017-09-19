@@ -13,5 +13,5 @@
 * **spring-boot-restful-demo**：
 
     * 构建RESTful API。
-    * 总结常用的spring MVC注解，参见UserController.java注释。
+    * 总结常用的spring MVC注解，参见[UserController.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-restful-demo/src/main/java/com/leeyom/controller/UserController.java)注释。
     * 采用chrome浏览器的Postman插件测试各接口的调用情况。
