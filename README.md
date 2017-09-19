@@ -1,4 +1,4 @@
-参考[Spring Boot基础教程](http://blog.didispace.com/Spring-Boot%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/)，整理的学习笔记。
+参考[程序猿DD](https://github.com/dyc87112)大佬的[Spring Boot基础教程](http://blog.didispace.com/Spring-Boot%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/)，整理的学习笔记。
 
 # 工程配置
 
