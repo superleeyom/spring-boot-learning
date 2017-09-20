@@ -25,6 +25,7 @@
     * **内容**：
         * spring boot 配置 [thymeleaf](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-template-demo/src/main/resources/templates/index.html) 模板引擎。
         * 修改模板文件的后缀，以及默认路径。
+        * Web应用的统一异常处理。
     * **笔记**：
         * 如果需要修改模板文件的后缀，以及默认路径，只需要在application.properties文件里修改如下的属性即可:
             ```properties
