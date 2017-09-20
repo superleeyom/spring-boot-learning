@@ -2,21 +2,55 @@
 
 # 工程配置
 
-* **spring-boot-properties-demo**：
-
-    * 属性配置文件的自定义属性与加载。
-    * 属性配置文件的参数引用和随机数。
-    * 多环境配置，根据不同的环境将属性配置文件切换为生产、开发、测试。
+1. **spring-boot-properties-demo**：
+    1. 内容：
+        * 属性配置文件的自定义属性与加载。
+        * 属性配置文件的参数引用和随机数。
+        * 多环境配置，根据不同的环境将属性配置文件切换为生产、开发、测试。
 
 # Web开发
 
-* **spring-boot-restful-demo**：
-
-    * 构建RESTful API。
-    * 总结常用的spring MVC注解，参见[UserController.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-restful-demo/src/main/java/com/leeyom/controller/UserController.java)注释。
-    * 采用chrome浏览器的Postman插件测试各接口的调用情况。
+1. **spring-boot-restful-demo**：
+    1. 内容：
+        * 构建RESTful API。
+        * 总结常用的spring MVC注解，参见[UserController.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-restful-demo/src/main/java/com/leeyom/controller/UserController.java)注释。
+        * 采用chrome浏览器的Postman插件测试各接口的调用情况。
+    2. 笔记：
+        * **@RestController**：Spring4之后加入的注解，原来在@Controller中返回json需要@ResponseBody来配合，如果直接用@RestController替代@Controller就不需要再配置。
+        * **@ModelAttribute**: 绑定请求参数到指定的对象。
+        * **@PathVariable**：获取请求url中的动态参数。
+        * **@RequestParam**: 接受简单类型的属性，也可以接受对象类型。类似@RequestParam("id")等价于request.getParameter("id");
     
-* **spring-boot-template-demo**：
-
-    * spring boot 配置 thymeleaf 模板引擎。
-    * 修改模板文件的后缀，以及默认路径。
+2. **spring-boot-template-demo**：
+    1. 内容：
+        * spring boot 配置 thymeleaf 模板引擎。
+        * 修改模板文件的后缀，以及默认路径。
+    2. 笔记：
+        * 如果需要修改模板文件的后缀，以及默认路径，只需要在application.properties文件里修改如下的属性即可:
+          ```properties
+          # 是否启用缓存
+          spring.thymeleaf.cache=true
+          # 检查当前模板文件是否存在
+          spring.thymeleaf.check-template-location=true
+          # 设置模板文件的Content-Type
+          spring.thymeleaf.content-type=text/html
+          # 是否启用thymeleaf模板引擎
+          spring.thymeleaf.enabled=true
+          # 编码格式
+          spring.thymeleaf.encoding=UTF-8
+          # Comma-separated list of view names that should be excluded from resolution.
+          spring.thymeleaf.excluded-view-names=
+          # 模板文件的模式
+          spring.thymeleaf.mode=HTML5
+          # 模板文件的路径
+          spring.thymeleaf.prefix=classpath:/templates/
+          # 模板文件的后缀
+          spring.thymeleaf.suffix=.html
+        ```
+3. **spring-boot-swagger-demo**：
+    1. 内容：
+        * Spring Boot中使用Swagger2构建RESTful API 文档。
+    2. 笔记：
+        * **@ApiOperation**：给API增加说明
+        * **@ApiImplicitParam**：给单个参数添加说明
+        * **@ApiImplicitParams**：给多个参数添加说明
