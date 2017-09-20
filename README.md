@@ -15,3 +15,8 @@
     * 构建RESTful API。
     * 总结常用的spring MVC注解，参见[UserController.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-restful-demo/src/main/java/com/leeyom/controller/UserController.java)注释。
     * 采用chrome浏览器的Postman插件测试各接口的调用情况。
+    
+* **spring-boot-template-demo**：
+
+    * spring boot 配置 thymeleaf 模板引擎。
+    * 修改模板文件的后缀，以及默认路径。
