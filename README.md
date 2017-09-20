@@ -3,7 +3,7 @@
 # 工程配置
 
 1. **spring-boot-properties-demo**：
-    * 内容：
+    * **内容**：
         * 属性配置文件的自定义属性与加载。
         * [属性配置文件的参数引用和随机数](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-properties-demo/src/main/resources/application.properties)。
         * 多环境配置，根据不同的环境将属性配置文件切换为生产、开发、测试。
