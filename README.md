@@ -47,6 +47,9 @@
           # 模板文件的后缀
           spring.thymeleaf.suffix=.html
             ```
+        * **[@ControllerAdvice](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-template-demo/src/main/java/com/leeyom/web/GlobalExceptionHandler.java)**：定义一个统一的异常处理类。
+        * **[@ExceptionHandler](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-template-demo/src/main/java/com/leeyom/web/GlobalExceptionHandler.java)**：用来定义函数针对的异常类型。这里定义的是顶级的异常父类 Execption，也就是只要其他的 handler 里面的有抛出任何的异常，
+                都会触发这个方法，然后将其映射到 error.html页面中，也可以根据抛出的具体Exception类型匹配@ExceptionHandler中配置的异常类型来匹配错误映射和处理。    
 3. **spring-boot-swagger-demo**：
     * **内容**：
         * Spring Boot中使用Swagger2构建RESTful API 文档。
