@@ -27,7 +27,7 @@
         * 修改模板文件的后缀，以及默认路径。
     2. 笔记：
         * 如果需要修改模板文件的后缀，以及默认路径，只需要在application.properties文件里修改如下的属性即可:
-          ```properties
+            ```properties
           # 是否启用缓存
           spring.thymeleaf.cache=true
           # 检查当前模板文件是否存在
@@ -46,7 +46,7 @@
           spring.thymeleaf.prefix=classpath:/templates/
           # 模板文件的后缀
           spring.thymeleaf.suffix=.html
-        ```
+            ```
 3. **spring-boot-swagger-demo**：
     1. 内容：
         * Spring Boot中使用Swagger2构建RESTful API 文档。
