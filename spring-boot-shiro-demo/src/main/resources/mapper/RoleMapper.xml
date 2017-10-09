@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.leeyom.dao.RoleMapper">
+  <resultMap id="BaseResultMap" type="com.leeyom.model.Role">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="roleDesc" jdbcType="VARCHAR" property="roledesc" />
+  </resultMap>
+
+  <select id="queryRoleListWithSelected" parameterType="int" resultType="com.leeyom.model.Role">
+    SELECT r.id,r.roleDesc,
+    (CASE WHEN (SELECT ur.roleId FROM user_role ur WHERE ur.userId= #{id} AND ur.roleId = r.id) THEN 1 ELSE 0 END) AS selected
+    FROM role r
+  </select>
+</mapper>
