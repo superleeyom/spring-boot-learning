@@ -58,3 +58,21 @@
         * **[@ApiOperation](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-swagger-demo/src/main/java/com/leeyom/controller/UserController.java)**：给API增加说明
         * **[@ApiImplicitParam](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-swagger-demo/src/main/java/com/leeyom/controller/UserController.java)**：给单个参数添加说明
         * **[@ApiImplicitParams](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-swagger-demo/src/main/java/com/leeyom/controller/UserController.java)**：给多个参数添加说明
+        
+# 安全管理
+    
+1. **spring-boot-shiro-demo**：   
+    * **内容**：
+        * Spring boot 整合 shiro 进行权限控制和会话管理。
+    * **笔记**：
+        * 数据库表结构参考`resources`下面的[db.sql](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-shiro-demo/src/main/resources/db.sql)。
+        * 数据库连接池采用阿里巴巴的`Druid(德鲁伊)`，配置文件[DruidConfig.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-shiro-demo/src/main/java/com/leeyom/config/DruidConfig.java)。
+        * 集成shiro，可以对用户进行授权和认证以及会话管理，核心配置文件[ShiroConfig.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-shiro-demo/src/main/java/com/leeyom/config/ShiroConfig.java)。
+        * 集成模板引擎thymeleaf，pom里面引入`thymeleaf-extras-shiro`依赖，这样在模板引擎里面可以使用shiro标签进行权限粗细度的控制。
+        * 采用redis来管理session会话，redis配置文件[RedisConfig.java](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-shiro-demo/src/main/java/com/leeyom/config/RedisConfig.java)。
+        * 集成分页插件`PageHelper`，详情见[分页插件 PageHelper](https://pagehelper.github.io/)。
+        * 集成大牛封装好的`通用Mapper`插件，详情见[通用Mapper](https://mapperhelper.github.io/docs/)。
+        * mybatis相关的工具、源码、文档、插件、示例参考：[MyBatis 相关工具](http://www.mybatis.tk/)。
+    * **问题**：
+        * 无法注入mapper，经过检查发现，在程序启动的入口处（Application.java），需要对dao包进行扫描，添加注解`@MapperScan(basePackages = "com.leeyom.dao")`既可以解决问题。
+        * `Application.java`应该和service、dao、controller等package同级的位置，不然会引起扫描不到注解的问题，这里是需要注意的一点。
