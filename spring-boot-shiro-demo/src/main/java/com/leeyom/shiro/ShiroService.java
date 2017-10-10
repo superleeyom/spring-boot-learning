@@ -23,6 +23,7 @@ public class ShiroService {
     private ResourcesService resourcesService;
     @Autowired
     private RedisSessionDAO redisSessionDAO;
+
     /**
      * 初始化权限
      */
@@ -30,16 +31,16 @@ public class ShiroService {
         // 权限控制map.从数据库获取
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
         filterChainDefinitionMap.put("/logout", "logout");
-        filterChainDefinitionMap.put("/css/**","anon");
-        filterChainDefinitionMap.put("/js/**","anon");
-        filterChainDefinitionMap.put("/img/**","anon");
-        filterChainDefinitionMap.put("/font-awesome/**","anon");
+        filterChainDefinitionMap.put("/css/**", "anon");
+        filterChainDefinitionMap.put("/js/**", "anon");
+        filterChainDefinitionMap.put("/img/**", "anon");
+        filterChainDefinitionMap.put("/font-awesome/**", "anon");
         List<Resources> resourcesList = resourcesService.queryAll();
-        for(Resources resources:resourcesList){
+        for (Resources resources : resourcesList) {
 
             if (StringUtil.isNotEmpty(resources.getResurl())) {
-                String permission = "perms[" + resources.getResurl()+ "]";
-                filterChainDefinitionMap.put(resources.getResurl(),permission);
+                String permission = "perms[" + resources.getResurl() + "]";
+                filterChainDefinitionMap.put(resources.getResurl(), permission);
             }
         }
         filterChainDefinitionMap.put("/**", "authc");
@@ -55,11 +56,9 @@ public class ShiroService {
 
             AbstractShiroFilter shiroFilter = null;
             try {
-                shiroFilter = (AbstractShiroFilter) shiroFilterFactoryBean
-                        .getObject();
+                shiroFilter = (AbstractShiroFilter) shiroFilterFactoryBean.getObject();
             } catch (Exception e) {
-                throw new RuntimeException(
-                        "get ShiroFilter from shiroFilterFactoryBean error!");
+                throw new RuntimeException("get ShiroFilter from shiroFilterFactoryBean error!");
             }
 
             PathMatchingFilterChainResolver filterChainResolver = (PathMatchingFilterChainResolver) shiroFilter
@@ -71,15 +70,12 @@ public class ShiroService {
             manager.getFilterChains().clear();
 
             shiroFilterFactoryBean.getFilterChainDefinitionMap().clear();
-            shiroFilterFactoryBean
-                    .setFilterChainDefinitionMap(loadFilterChainDefinitions());
+            shiroFilterFactoryBean.setFilterChainDefinitionMap(loadFilterChainDefinitions());
             // 重新构建生成
-            Map<String, String> chains = shiroFilterFactoryBean
-                    .getFilterChainDefinitionMap();
+            Map<String, String> chains = shiroFilterFactoryBean.getFilterChainDefinitionMap();
             for (Map.Entry<String, String> entry : chains.entrySet()) {
                 String url = entry.getKey();
-                String chainDefinition = entry.getValue().trim()
-                        .replace(" ", "");
+                String chainDefinition = entry.getValue().trim().replace(" ", "");
                 manager.createChain(url, chainDefinition);
             }
 

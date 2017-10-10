@@ -15,12 +15,12 @@ import java.util.Map;
 
 @Service("resourcesService")
 public class ResourcesServiceImpl extends BaseService<Resources> implements ResourcesService {
-   @Resource
+    @Resource
     private ResourcesMapper resourcesMapper;
 
     @Override
     public PageInfo<Resources> selectByPage(Resources resources, int start, int length) {
-        int page = start/length+1;
+        int page = start / length + 1;
         Example example = new Example(Resources.class);
         //分页查询
         PageHelper.startPage(page, length);
@@ -29,12 +29,12 @@ public class ResourcesServiceImpl extends BaseService<Resources> implements Reso
     }
 
     @Override
-    public List<Resources> queryAll(){
+    public List<Resources> queryAll() {
         return resourcesMapper.queryAll();
     }
 
     @Override
-    @Cacheable(cacheNames="resources",key="#map['userid'].toString()+#map['type']")
+    @Cacheable(cacheNames = "resources", key = "#map['userid'].toString()+#map['type']")
     public List<Resources> loadUserResources(Map<String, Object> map) {
         return resourcesMapper.loadUserResources(map);
     }
