@@ -124,9 +124,9 @@ spring boot官方建议的目录如下：
     }
     ```
 
-# <span id="快速Web开发">快速 Web 开发</span>
+# <span id="快速Web开发">快速Web开发</span>
 
-## <span id="Json的支持">Json 的支持</span>
+## <span id="Json的支持">Json的支持</span>
 
 在使用SSM架构编写controller的时候，如果要返回json格式的数据，需要如下几步：
 1. 在pom文件中添加解析json的库，比如`gson`、`fastjson`。
@@ -275,7 +275,7 @@ public class MyWebConfiguration {
 }
 ```
 
-## <span id="读取Properties">读取 Properties</span>
+## <span id="读取Properties">读取Properties</span>
 
 在`application.properties`文件中添加如下的属性：
 
