@@ -1,6 +1,6 @@
-package com.leaderment.helloworld;
+package com.leeyom.helloworld;
 
-import com.leaderment.helloworld.web.HelloWorldController;
+import com.leeyom.helloworld.web.HelloWorldController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
