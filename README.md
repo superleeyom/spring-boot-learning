@@ -1,7 +1,7 @@
 # 目录
 
 - [x] [Hello World](#hello-world)
-- [ ] 快速体验 Web 开发
+- [x] [快速 Web 开发](#web)
 - [ ] Spring Data JPA 的使用
 - [ ] 模板引擎 Thymeleaf
 - [ ] JPA 和 Thymeleaf 实践
@@ -115,3 +115,196 @@ spring boot官方建议的目录如下：
         }
     }
     ```
+
+# <span id="web">快速 Web 开发</span>
+
+## Json 的支持
+
+在使用SSM架构编写controller的时候，如果要返回json格式的数据，需要如下几步：
+1. 在pom文件中添加解析json的库，比如`gson`、`fastjson`。
+2. 配置spring mvc。
+3. 在controller里的每个方法的上面添加`@ResponseBody`注解。
+
+`@RestController`注解是Spring4之后加入的注解，原来在`@Controller`中返回json需要`@ResponseBody`来配合，如果直接用`@RestController`替代`@Controller`就不需要再配置，也不需要配置spring mvc，就可以发布一个http接口，非常方便快捷。
+
+```java
+@RestController
+public class WebController {
+    @RequestMapping("/getUser")
+    public User getUser() {
+        User user = new User();
+        user.setName("leeyom");
+        user.setAge(24);
+        user.setPass("123456");
+        return user;
+    }
+}
+```
+
+## 请求传参
+常用的传参注解：
+- `@RequestBody`：绑定参数到指定对象，只适用于post和put请求，get请求不适用，在Spring Boot中，这个注解其实都不需要加。
+- `@ModelAttribute`: 绑定请求参数到指定的对象，跟`@RequestBody`差不多。
+- `@PathVariable`：获取请求url中的动态参数。
+  - 比如请求url：`http://localhost:8080/get/leeyom`。
+    ```java
+    @RequestMapping(value="get/{name}", method= RequestMethod.GET)
+    public User get(@PathVariable String name) {
+        User user=new User();
+        user.setName(name);
+        return user;
+    }
+    ```
+    那么，参数`name`的值为：`leeyom`。
+- `@RequestParam`: 接受简单类型的属性，也可以接受对象类型。类似`@requestparam("id")`等价于`request.getParameter("id")`;
+
+## 参数校验
+
+实际请求中除了前端要做参数校验，后台也需要做参数校验，在Spring Boot的`spring-boot-starter-web`库中集成了 `hibernate-validator` 来进行参数校验，常用的校验注解：
+
+- Bean Validation 中内置的 constraint 注解：
+  - `@Valid`：用于标识指定的校验对象。
+  - `@Null`：被注释的元素必须为 null。
+  - `@NotNull`：被注释的元素必须不为 null。
+  - `@AssertTrue`：被注释的元素必须为 true。
+  - `@AssertFalse`：被注释的元素必须为 false。
+  - `@Min(value)`：被注释的元素必须是一个数字，其值必须大于等于指定的最小值。
+  - `@Max(value)`：被注释的元素必须是一个数字，其值必须小于等于指定的最大值。
+  - `@DecimalMin(value)`：被注释的元素必须是一个数字，其值必须大于等于指定的最小值。
+  - `@DecimalMax(value)`：被注释的元素必须是一个数字，其值必须小于等于指定的最大值。
+  - `@Size(max, min)`：被注释的元素的大小必须在指定的范围内。
+  - `@Digits (integer, fraction)`：被注释的元素必须是一个数字，其值必须在可接受的范围内。
+  - `@Past`：被注释的元素必须是一个过去的日期。
+  - `@Future`：被注释的元素必须是一个将来的日期。
+  - `@Pattern(value)`：被注释的元素必须符合指定的正则表达式。
+- Hibernate Validator 附加的 constraint 注解：
+  - `@Email`：被注释的元素必须是电子邮箱地址。
+  - `@Length`：被注释的字符串的大小必须在指定的范围内。
+  - `@NotEmpty`：被注释的字符串的必须非空。
+  - `@Range`：被注释的元素必须在合适的范围内。
+
+对User参数进行参数校验：
+
+```java
+public class User {
+    @NotEmpty(message="姓名不能为空")
+    private String name;
+    @Max(value = 100, message = "年龄不能大于 100 岁")
+    @Min(value= 18 ,message= "必须年满 18 岁！" )
+    private int age;
+    @NotEmpty(message="密码不能为空")
+    @Length(min=6,message="密码长度不能小于 6 位")
+    private String pass;
+    //...
+}
+```
+
+Controller里面采用使用 `@Valid + BindingResult`绑定参数和打印校验结果：
+
+```java
+@RequestMapping("/saveUser")
+public void saveUser(@Valid User user, BindingResult result) {
+    System.out.println("user:" + user);
+    if (result.hasErrors()) {
+        List<ObjectError> list = result.getAllErrors();
+        for (ObjectError error : list) {
+            System.out.println(error.getCode() + "-" + error.getDefaultMessage());
+        }
+    }
+}
+```
+
+## 自定义过滤器
+
+创建一个名为`MyFilter`过滤器，实现Filter，拦截所有的请求，然后打印对应的请求的URL：
+
+```java
+public class MyFilter implements Filter {
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse
+    , FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
+        System.out.println("this is MyFilter,url :" + request.getRequestURI());
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+}
+```
+在SSM架构中，需要在`web.xml`文件中配置自定义的过滤器，在Spring Boot中，需要创建一个带`@Configuration`注解的类`MyWebConfiguration.java`，用于注册我们自定义的过滤器：
+```java
+@Configuration
+public class MyWebConfiguration {
+
+    @Bean
+    public RemoteIpFilter remoteIpFilter() {
+        return new RemoteIpFilter();
+    }
+
+    /**
+     * 注册自定义的过滤器
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean testFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new MyFilter());
+        registration.addUrlPatterns("/*");
+        registration.addInitParameter("paramName", "paramValue");
+        registration.setName("MyFilter");
+        registration.setOrder(1);
+        return registration;
+    }
+
+}
+```
+
+## 读取 Properties
+
+在`application.properties`文件中添加如下的属性：
+
+```
+com.leeyom.title=leeyom
+com.leeyom.description=一只有梦想的咸鱼
+```
+
+将`application.properties`里面的属性映射到一个配置类中：
+
+```java
+@Component
+public class LeeyomProperties {
+
+    @Value("${com.leeyom.title}")
+    private String title;
+    @Value("${com.leeyom.description}")
+    private String description;
+
+    //省略getter和setter
+}
+```
+在测试类中打印`application.properties`里面的属性：
+
+```java
+
+@Resource
+private LeeyomProperties leeyomProperties;
+@Test
+public void testProperties() throws Exception {
+    System.out.println("title:" + leeyomProperties.getTitle());
+    System.out.println("description:" + leeyomProperties.getDescription());
+}
+```
+打印结果：
+
+```
+title:leeyom
+description:一只有梦想的咸鱼
+```
