@@ -110,7 +110,8 @@ spring boot官方建议的目录如下：
         }
         @Test
         public void getHello() throws Exception {
-            mockMvc.perform(MockMvcRequestBuilders.post("/hello?name=小明").accept(MediaType.APPLICATION_JSON_UTF8)).andDo(print());
+            mockMvc.perform(MockMvcRequestBuilders.post("/hello?name=小明")
+            .accept(MediaType.APPLICATION_JSON_UTF8)).andDo(print());
         }
     }
     ```
