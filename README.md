@@ -10,7 +10,7 @@
   - [x] [参数校验](#参数校验)
   - [x] [自定义过滤器](#自定义过滤器)
   - [x] [读取Properties](#读取properties)
-- [x] [Spring Data JPA 的使用](#jpa-use)
+- [x] [Spring Data JPA 的使用](#springdatajpa的使用)
   - [x] [JPA简单概念](#jpa简单概念)
   - [x] [快速上手](#快速上手)
   - [x] [基本查询](#基本查询)
@@ -322,7 +322,7 @@ title:leeyom
 description:一只有梦想的咸鱼
 ```
 
-# <span id="jpa-use">Spring Data JPA 的使用</span>
+# Spring Data JPA 的使用
 
 ## JPA简单概念
 
@@ -442,7 +442,7 @@ User findByUserNameOrEmail(String username, String email);
 
 ## 复杂查询
 
-可以使用在方法上加注解`@Query`，进行自定义查询，但是需要注意的是，由于Spring Data JPA底层采用的Hibernate，**所以这里的查询语句为HQL，不是sql，需要注意**，比如分页查询：
+可以使用在方法上加注解`@Query`，进行自定义查询，但是需要注意的是，由于Spring Data JPA底层采用的Hibernate，**所以这里的查询语句为HQL，不是sql，需要注意**，比如分页查询：
 ```java
 /**
   * 分页查询
