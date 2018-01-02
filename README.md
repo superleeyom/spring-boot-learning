@@ -10,7 +10,7 @@
   - [x] [参数校验](#参数校验)
   - [x] [自定义过滤器](#自定义过滤器)
   - [x] [读取Properties](#读取properties)
-- [x] [Spring Data JPA 的使用](#springdatajpa的使用)
+- [x] [Spring Data JPA 的使用](#jpa-use)
   - [x] [JPA简单概念](#jpa简单概念)
   - [x] [快速上手](#快速上手)
   - [x] [基本查询](#基本查询)
@@ -322,7 +322,7 @@ title:leeyom
 description:一只有梦想的咸鱼
 ```
 
-# Spring Data JPA 的使用
+# <span id="jpa-use">Spring Data JPA 的使用</span>
 
 ## JPA简单概念
 
