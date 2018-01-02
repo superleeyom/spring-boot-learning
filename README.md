@@ -10,7 +10,12 @@
   - [x] [参数校验](#参数校验)
   - [x] [自定义过滤器](#自定义过滤器)
   - [x] [读取Properties](#读取properties)
-- [ ] Spring Data JPA 的使用
+- [x] [Spring Data JPA 的使用](#jpa)
+  - [x] [JPA简单概念](#jpa简单概念)
+  - [x] [快速上手](#快速上手)
+  - [x] [基本查询](#基本查询)
+  - [x] [复杂查询](#复杂查询)
+  - [x] [关联查询](#关联查询)
 - [ ] 模板引擎 Thymeleaf
 - [ ] JPA 和 Thymeleaf 实践
 - [ ] 使用Swagger2构建RESTful API 文档
@@ -316,3 +321,200 @@ public void testProperties() throws Exception {
 title:leeyom
 description:一只有梦想的咸鱼
 ```
+
+# <span id="jpa"> Spring Data JPA 的使用</span>
+
+## JPA简单概念
+
+Spring Data JPA 是 Spring 基于 ORM 框架、JPA 规范的基础上封装的一套 JPA 应用框架，可使开发者用极简的代码即可实现对数据的访问和操作。它提供了包括增删改查等在内的常用功能，且易于扩展。学习并使用 Spring Data JPA 可以极大提高开发效率。
+
+## 快速上手
+
+- 添加相关的依赖：
+  ```xml
+  <dependency>
+    <groupId>org.Springframework.boot</groupId>
+    <artifactId>Spring-boot-starter-data-jpa</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+  </dependency>
+  ```
+- 配置数据源：
+  ```
+  Spring.datasource.url=jdbc:mysql://localhost:3306/jpa-test
+  Spring.datasource.username=root
+  Spring.datasource.password=root
+  Spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+  Spring.jpa.properties.hibernate.hbm2ddl.auto=update
+  Spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
+  Spring.jpa.show-sql= true
+  ```
+  - `hibernate.hbm2ddl.auto`：用于：自动创建 | 更新 | 验证数据库表结构
+    - `create`：每次加载 hibernate 时都会删除上一次的生成的表，然后根据 model 类再重新来生成新表，哪怕两次没有任何改变也要这样执行，这就是导致数据库表数据丢失的一个重要原因。
+    - `create-drop`：每次加载 hibernate 时根据 model 类生成表，但是 sessionFactory 一关闭，表就自动删除。
+    - `update`：最常用的属性，第一次加载 hibernate 时根据 model 类会自动建立起表的结构（前提是先建立好数据库），以后加载 hibernate 时根据 model 类自动更新表结构，即使表结构改变了，但表中的行仍然存在，不会删除以前的行。要注意的是当部署到服务器后，表结构是不会被马上建立起来的，是要等应用第一次运行起来后才会。
+    - `validate`：每次加载 hibernate 时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值。
+  - `dialect`：设置数据库方言，指定生成表名的存储引擎为 InneoDB。
+  - `show-sql`：是否打印出自动生产的 SQL，方便调试的时候查看。
+- 实体类：实体类中不映射成列的字段得加 `@Transient` 注解，不加注解也会映射成列：
+  ```java
+  @Entity
+  public class User implements Serializable {
+      private static final long serialVersionUID = 1L;
+      @Id
+      @GeneratedValue
+      private Long id;
+      @Column(nullable = false, unique = true)
+      private String userName;
+      @Column(nullable = false)
+      private String passWord;
+      @Column(nullable = false, unique = true)
+      private String email;
+      @Column(nullable = true, unique = true)
+      private String nickName;
+      @Column(nullable = false)
+      private String regTime;
+      //省略 getter settet 方法、构造方法
+  }
+  ```
+- dao层：Dao 只要继承 `JpaRepository` 类就可以使用常用的一些增删改成，对于一些复杂的查询，可以在dao层新增方法进行扩展。
+  ```java
+  User findByUserName(String userName);
+  User findByUserNameOrEmail(String username, String email);
+  ```
+- 测试：
+  ```java
+  @Resource
+  private UserRepository userRepository;
+  @Test
+  public void testUserRespository() {
+
+      Date date = new Date();
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      String formattedDate = dateFormat.format(date);
+
+      userRepository.save(new User("leeyom1", "123", "leeyomwang1@qq.com", "Leeyom1", formattedDate));
+      userRepository.save(new User("leeyom2", "456", "leeyomwang2@qq.com", "Leeyom2", formattedDate));
+      userRepository.save(new User("leeyom3", "789", "leeyomwang3@qq.com", "Leeyom3", formattedDate));
+
+      System.out.println(userRepository.findAll().size());
+      System.out.println("Leeyom3".equals(
+      userRepository.findByUserNameOrEmail("leeyom3", "leeyomwang3@qq.com").getNickName()));
+      userRepository.delete(userRepository.findByUserName("leeyom2"));
+      System.out.println(userRepository.findAll().size());
+
+      // 打印后的结果为：
+      // 3
+      // true
+      // 2
+  }
+  ```
+
+## 基本查询
+
+第一种，使用Spring Data JPA默认预先生成了一些基本的 CURD 的方法，如增、删、改等。只需要我们创建到dao继承`JpaRepository` 类：
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+}
+```
+提供的方法有：
+
+```java
+@Test
+public void testBaseQuery() {
+    userRepository.findAll();
+    userRepository.findOne(1l);
+    userRepository.save(user);
+    userRepository.delete(user);
+    userRepository.count();
+    userRepository.exists(1l);
+    // ...
+}
+```
+第二种，Spring Data JPA 提供自定义的简单查询，根据方法名来自动生成 SQL，主要的语法是 findXXBy、readAXXBy、queryXXBy、countXXBy、getXXBy 后面跟属性名称：
+```java
+User findByUserName(String userName);
+User findByUserNameOrEmail(String username, String email);
+```
+
+## 复杂查询
+
+可以使用在方法上加注解`@Query`，进行自定义查询，但是需要注意的是，由于Spring Data JPA底层采用的Hibernate，**所以这里的查询语句为HQL，不是sql，需要注意**，比如分页查询：
+```java
+/**
+  * 分页查询
+  * @param pageable 分页参数封装
+  * @return
+  */
+ @Query("select u from User u")
+ @Override
+ Page<User> findAll(Pageable pageable);
+```
+测试：
+```java
+@Test
+public void testPageQuery() {
+    int page=1,size=20;
+    Sort sort = new Sort(Sort.Direction.DESC, "id");
+    Pageable pageable = new PageRequest(page, size, sort);
+    Page<User> userPage = userRepository.findAll(pageable);
+    System.out.println("总数量："+userPage.getTotalPages());
+    System.out.println(userPage.getContent());
+}
+```
+## 关联查询
+
+- 有时候会有多表关联查询，首先先创建用户详情类：
+  ```java
+  @Entity
+  public class UserDetail implements Serializable {
+
+      private static final long serialVersionUID = 1L;
+      @Id
+      @GeneratedValue
+      private Long id;
+      @Column(nullable = false, unique = true)
+      private String userId;
+      @Column(nullable = true)
+      private String address;
+      @Column(nullable = true)
+      private String hobby;
+      //省略 getter settet 方法
+  }
+  ```
+- 定义一个结果集的接口类，接口类的内容来自于用户表和用户详情表：
+  ```java
+  public interface UserInfo {
+      String getUserName();
+      String getEmail();
+      String getAddress();
+      String getHobby();
+  }
+  ```
+- 创建对应的dao，接口的返回类型为UserInfo：
+  ```java
+  @Query("select u.userName as userName, u.email as email, d.address as address ,
+  d.hobby as hobby from User u , UserDetail d " +
+      "where u.id=d.userId  and  d.hobby = ?1 ")
+  List<UserInfo> findUserInfo(String hobby);
+  ```
+- 测试：
+  ```java
+  @Resource
+  private UserDetailRepository userDetailRepository;
+  @Test
+  public void testUserInfo(){
+      userDetailRepository.save(new UserDetail("12","Hong Kong","running"));
+      List<UserInfo> userInfos=userDetailRepository.findUserInfo("running");
+      for (UserInfo userInfo:userInfos){
+          System.out.println("addree "+userInfo.getAddress());
+      }
+  }
+  ```
+- 打印结果：
+  ```
+  addree Hong Kong
+  ```
