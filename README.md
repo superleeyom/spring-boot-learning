@@ -36,7 +36,7 @@
 - IntelliJ IDEA 2017.2.4
 - spring boot 1.5.9
 
-# <span id="hello-world">Hello World</span>
+# Hello World
 
 ## 官方推荐目录
 
