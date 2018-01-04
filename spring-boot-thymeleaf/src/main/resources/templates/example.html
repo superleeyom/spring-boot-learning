@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>spring boot 模板引擎示例</title>
+</head>
+<body>
+
+<p th:text="${userName}">leeyom</p>
+<!--字符串拼接的第一种方式-->
+<span th:text="'Welcome to our application, ' + ${userName} + '!'"></span>
+<br/>
+<!--字符串拼接的第二种方式-->
+<span th:text="|Welcome to our application, ${userName}!|"></span>
+
+<br/>
+<!--条件判断-->
+<a th:if="${flag == 'yes'}"  th:href="@{/home}"> home </a>
+<a th:unless="${flag != 'no'}" th:href="@{http://www.leeyom.top/}" >www.leeyom.top</a>
+
+<!--循环-->
+<table>
+    <tr  th:each="user,iterStat : ${users}">
+        <td th:text="${user.name}">leeyom</td>
+        <td th:text="${user.age}">24</td>
+        <td th:text="${user.pass}">123</td>
+        <td th:text="${iterStat.index}">index</td>
+    </tr>
+</table>
+<!--URL-->
+<a  th:href="@{http://www.leeyom.top/{type}(type=${type})}">link1</a>
+<a href="details.html" th:href="@{http://www.leeyom.top/{pageId}/can-use-springcloud.html(pageId=${pageId})}">view</a>
+</body>
+</html>

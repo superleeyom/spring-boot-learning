@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>spring boot 模板引擎示例</title>
+</head>
+<body>
+<h1 th:text="${message}">Hello World</h1>
+<!--th:include 和 th:replace 区别，include 只是加载，replace 是替换。-->
+<div th:include="layout/copyright :: copyright"></div>
+<div th:replace="layout/copyright :: copyright"></div>
+</body>
+</html>
