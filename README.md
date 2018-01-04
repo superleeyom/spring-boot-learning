@@ -16,7 +16,9 @@
   - [x] [基本查询](#基本查询)
   - [x] [复杂查询](#复杂查询)
   - [x] [关联查询](#关联查询)
-- [ ] 模板引擎 Thymeleaf
+- [x] [模板引擎Thymeleaf](#模板引擎-thymeleaf)
+  - [x] [简单上手](#简单上手)
+  - [x] [常用标签汇总](#常用标签汇总)
 - [ ] JPA 和 Thymeleaf 实践
 - [ ] 使用Swagger2构建RESTful API 文档
 - [ ] Spring Boot 集成 MyBatis
@@ -518,3 +520,93 @@ public void testPageQuery() {
   ```
   addree Hong Kong
   ```
+
+# 模板引擎 Thymeleaf
+
+## 简单上手
+
+- 添加相关的依赖。
+  ```xml
+  <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter-thymeleaf</artifactId>
+  </dependency>
+  <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  ```
+- 添加配置文件`application.properties`。
+  ```properties
+  # 是否启用缓存，生产环境开启，开发环境关闭
+  spring.thymeleaf.cache=false
+  # 检查当前模板文件是否存在
+  spring.thymeleaf.check-template-location=true
+  # 设置模板文件的Content-Type
+  spring.thymeleaf.content-type=text/html
+  # 是否启用thymeleaf模板引擎
+  spring.thymeleaf.enabled=true
+  # 编码格式
+  spring.thymeleaf.encoding=UTF-8
+  # 模板文件的模式
+  spring.thymeleaf.mode=HTML5
+  # 模板文件的路径
+  spring.thymeleaf.prefix=classpath:/templates/
+  # 模板文件的后缀
+  spring.thymeleaf.suffix=.html
+  ```
+- 创建`controller`控制器`HelloController.java`。
+  ```java
+  @RequestMapping("/")
+   public String helloWorld(ModelMap map) {
+       map.addAttribute("message", "http:www.leeyom.top");
+       return "index";
+   }
+  ```
+- 创建一个简单的页面`index.html`。
+  ```html
+  <!DOCTYPE html>
+  <html xmlns:th="http://www.w3.org/1999/xhtml">
+  <head lang="en">
+      <meta charset="UTF-8"/>
+      <title>spring boot 模板引擎示例</title>
+  </head>
+  <body>
+  <h1 th:text="${message}">Hello World</h1>
+  <!--th:include 和 th:replace 区别，include 只是加载，replace 是替换。-->
+  <div th:include="layout/copyright :: copyright"></div>
+  <div th:replace="layout/copyright :: copyright"></div>
+  </body>
+  </html>
+  ```
+- 启动项目，访问[http://localhost:8080/](http://localhost:8080/)，页面打印：
+  ```
+  http:www.leeyom.top
+  ```
+
+## 常用标签汇总
+| 关键字         | 功能介绍           | 案例                                                    |
+| ------------- |:------------------:| -------------------------------------------------------|
+| `th:id`       | 替换id             | `<input th:id="'xxx' + ${collect.id}"/>`               |
+| `th:text`     | 文本替换           |  `<p th:text="${collect.description}">description</p>`  |
+| `th:utext`    | 支持html的文本替换  |    `<p th:utext="${htmlcontent}">conten</p>`           |
+| `th:object`   | 替换对象           |    `<div th:object="${session.user}">`                 |
+| `th:value`    | 属性赋值           |    `<input th:value="${user.name}" />`                 |
+| `th:with`     | 变量赋值运算       |    `<div th:with="isEven=${prodStat.count}%2==0"></div>` |
+| `th:style`    | 设置样式           |    `th:style="'display:' + @{(${sitrue} ? 'none' : 'inline-block')} + ''"`           |
+| `th:onclick`  | 点击事件           |    `th:onclick="'getCollect()'"`                       |
+| `th:each`     |  循环             |    `<tr th:each="user,userStat:${users}">`              |
+| `th:if`       |  条件判断          |    `<a th:if="${userId == collect.userId}" >`          |
+| `th:unless`   |  和th:if判断相反   |    `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a>`           |
+| `th:href`     | 链接地址           |    `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a> />`           |
+| `th:switch`   | 多路选择 配合th:case 使用         |    `<div th:switch="${user.role}">`          |
+| `th:case`   | th:switch的一个分支         |    `<p th:case="'admin'">User is an administrator</p>`          |
+| `th:fragment`   | 布局标签，定义一个代码片段，方便其它地方引用         |    `<div th:fragment="alert">`          |
+| `th:include`   | 布局标签，替换内容到引入的文件  | `<head th:include="layout :: htmlhead" th:with="title='xx'"></head> />`          |
+| `th:replace`   | 布局标签，替换整个标签到引入的文件         |    `<div th:replace="fragments/header :: title"></div>`          |
+| `th:selected`   | selected选择框选中         |    `th:selected="(${xxx.id} == ${configObj.dd})"`          |
+| `th:src`   | 图片类地址引入         |    `<img class="img-responsive" alt="App Logo" th:src="@{/img/logo.png}" />`          |
+| `th:inline`   | 定义js脚本可以使用变量    |    `<script type="text/javascript" th:inline="javascript">`          |
+| `th:action`   | 表单提交的地址    |    `<form action="subscribe.html" th:action="@{/subscribe}">`          |
+| `th:remove`   | 删除某个属性    |    `<tr th:remove="all/body/tag/all-but-first/none">`          |
+| `th:attr`   | 设置标签属性，多个属性可以用逗号分隔    |    `th:attr="src=@{/image/aa.jpg},title=#{logo}"`          |
