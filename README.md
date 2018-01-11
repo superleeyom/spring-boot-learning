@@ -20,6 +20,7 @@
   - [x] [简单上手](#简单上手)
   - [x] [常用标签汇总](#常用标签汇总)
 - [ ] JPA 和 Thymeleaf 实践
+  - [x] [添加Servlet支持](#添加servlet支持)
 - [ ] 使用Swagger2构建RESTful API 文档
 - [ ] Spring Boot 集成 MyBatis
 - [ ] MyBatis Druid 多数据源
@@ -610,3 +611,22 @@ public void testPageQuery() {
 | `th:action`   | 表单提交的地址    |    `<form action="subscribe.html" th:action="@{/subscribe}">`          |
 | `th:remove`   | 删除某个属性    |    `<tr th:remove="all/body/tag/all-but-first/none">`          |
 | `th:attr`   | 设置标签属性，多个属性可以用逗号分隔    |    `th:attr="src=@{/image/aa.jpg},title=#{logo}"`          |
+
+# JPA 和 Thymeleaf 实践
+
+## 添加Servlet支持
+
+一个完整的web应用需要添加servlet支持，在spring boot的启动类`Application.java`中继承`SpringBootServletInitializer`类，代码如下：
+```java
+@SpringBootApplication
+public class Application extends SpringBootServletInitializer {
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(Application.class);
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
