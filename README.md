@@ -19,7 +19,8 @@
 - [x] [模板引擎Thymeleaf](#模板引擎-thymeleaf)
   - [x] [简单上手](#简单上手)
   - [x] [常用标签汇总](#常用标签汇总)
-- [ ] JPA 和 Thymeleaf 实践
+- [ ] [JPA 和 Thymeleaf 实践](#jpa-和-thymeleaf-实践)
+  - [x] [多环境配置](#多环境配置)
   - [x] [添加Servlet支持](#添加servlet支持)
 - [ ] 使用Swagger2构建RESTful API 文档
 - [ ] Spring Boot 集成 MyBatis
@@ -613,6 +614,14 @@ public void testPageQuery() {
 | `th:attr`   | 设置标签属性，多个属性可以用逗号分隔    |    `th:attr="src=@{/image/aa.jpg},title=#{logo}"`          |
 
 # JPA 和 Thymeleaf 实践
+
+## 多环境配置
+
+在实际开发中，开发环境、测试环境、生产环境对应的数据库，或者其他的端口信息都有不同，在发布新的版本的时候，我们需要将配置文件进行相应的修改，但是有时候我们总会忘记或者记错，这样就会导致线上出问题，所以根据不同的环境可以将属性配置文件切换为开发、测试、生产，分別对应的配置文件为：`application-dev.properties`、`application-test.properties`、`application-prod.properties`。只需要在总的配置文件`application.properties`中将属性配置文件切换为开发环境：
+```properties
+# 将属性配置文件切换为开发环境
+spring.profiles.active = dev
+```
 
 ## 添加Servlet支持
 

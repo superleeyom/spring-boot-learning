@@ -1,6 +1,7 @@
 package com.leeyom.pojo.db;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
  * @author Leeyom Wang
  * @date 2018年01月04日 17:14
  */
+@Entity
 public class User {
     @Id
     @GeneratedValue

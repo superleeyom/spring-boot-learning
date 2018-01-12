@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
  * @author Leeyom Wang
  * @date 2018年01月04日 17:16
  */
-public interface UserDao extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * 分页查询
      * @param pageable 分页参数封装
