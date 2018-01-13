@@ -19,9 +19,10 @@
 - [x] [模板引擎Thymeleaf](#模板引擎-thymeleaf)
   - [x] [简单上手](#简单上手)
   - [x] [常用标签汇总](#常用标签汇总)
-- [ ] [JPA 和 Thymeleaf 实践](#jpa-和-thymeleaf-实践)
+- [x] [JPA 和 Thymeleaf 实践](#jpa-和-thymeleaf-实践)
   - [x] [多环境配置](#多环境配置)
   - [x] [添加Servlet支持](#添加servlet支持)
+  - [x] [效果图](#效果图)
 - [ ] 使用Swagger2构建RESTful API 文档
 - [ ] Spring Boot 集成 MyBatis
 - [ ] MyBatis Druid 多数据源
@@ -639,3 +640,13 @@ public class Application extends SpringBootServletInitializer {
     }
 }
 ```
+## 效果图
+
+- 用户列表：
+  ![用户列表](http://image.leeyom.top/blog/180113/F7L5Lc0F8d.png?imageslim)
+- 新增用户：
+  ![新增用户](http://image.leeyom.top/blog/180113/IIfHd81LLJ.png?imageslim)
+- 编辑用户：
+  ![编辑用户](http://image.leeyom.top/blog/180113/0DE7GdAaae.png?imageslim)
+- 删除用户：
+  ![删除用户](http://image.leeyom.top/blog/180113/FmagcGG1gd.png?imageslim)

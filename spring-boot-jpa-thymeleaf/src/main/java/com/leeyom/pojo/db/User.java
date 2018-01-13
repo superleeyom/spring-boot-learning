@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Date;
  * @date 2018年01月04日 17:14
  */
 @Entity
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue
     private long id;
@@ -25,6 +26,15 @@ public class User {
     @Column(nullable = false)
     private Date regTime;
 
+    public User(String userName, String passWord, int age, Date regTime) {
+        this.userName = userName;
+        this.passWord = passWord;
+        this.age = age;
+        this.regTime = regTime;
+    }
+
+    public User() {
+    }
 
     public long getId() {
         return id;
