@@ -31,10 +31,10 @@
   - [x] [多环境配置](#多环境配置)
   - [x] [添加Servlet支持](#添加servlet支持)
   - [x] [效果图](#效果图)
-- [ ] [使用Swagger2构建RESTful API 文档](使用swagger2构建restful-api-文档)
+- [ ] [使用Swagger2构建RESTful API 文档](#使用swagger2构建restful-api-文档)
   - [ ] [RESTful API设计准则](#restful-api设计准则)
   - [ ] [swagger注解总结](#swagger注解总结)
-  - [ ] [快速上手](#快速上手)
+  - [ ] [快速上手](#快速上手-1)
 - [ ] Spring Boot 集成 MyBatis
 - [ ] MyBatis Druid 多数据源
 - [ ] 集成 Redis 实现数据缓存和 Session 共享
@@ -665,6 +665,6 @@ public class Application extends SpringBootServletInitializer {
 
 ## RESTful API设计准则
 
-## swagger常用注解总结
+## swagger注解总结
 
 ## 快速上手
