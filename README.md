@@ -289,7 +289,7 @@ public class MyWebConfiguration {
 
 在`application.properties`文件中添加如下的属性：
 
-```
+```properties
 com.leeyom.title=leeyom
 com.leeyom.description=一只有梦想的咸鱼
 ```
@@ -322,7 +322,7 @@ public void testProperties() throws Exception {
 ```
 打印结果：
 
-```
+```properties
 title:leeyom
 description:一只有梦想的咸鱼
 ```
@@ -347,7 +347,7 @@ Spring Data JPA 是 Spring 基于 ORM 框架、JPA 规范的基础上封装的�
   </dependency>
   ```
 - 配置数据源：
-  ```
+  ```properties
   Spring.datasource.url=jdbc:mysql://localhost:3306/jpa-test
   Spring.datasource.username=root
   Spring.datasource.password=root
