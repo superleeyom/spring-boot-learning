@@ -641,12 +641,11 @@ public class Application extends SpringBootServletInitializer {
 }
 ```
 ## 效果图
-
 - 用户列表：
-  ![用户列表](http://image.leeyom.top/blog/180113/F7L5Lc0F8d.png?imageslim)
+  ![用户列表](http://image.leeyom.top/blog/180113/F7L5Lc0F8d.png)
 - 新增用户：
-  ![新增用户](http://image.leeyom.top/blog/180113/IIfHd81LLJ.png?imageslim)
+  ![新增用户](http://image.leeyom.top/blog/180113/IIfHd81LLJ.png)
 - 编辑用户：
-  ![编辑用户](http://image.leeyom.top/blog/180113/0DE7GdAaae.png?imageslim)
+  ![编辑用户](http://image.leeyom.top/blog/180113/0DE7GdAaae.png)
 - 删除用户：
-  ![删除用户](http://image.leeyom.top/blog/180113/FmagcGG1gd.png?imageslim)
+  ![删除用户](http://image.leeyom.top/blog/180113/FmagcGG1gd.png)
