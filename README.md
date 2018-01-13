@@ -32,8 +32,8 @@
   - [x] [添加Servlet支持](#添加servlet支持)
   - [x] [效果图](#效果图)
 - [ ] [使用Swagger2构建RESTful API 文档](#使用swagger2构建restful-api-文档)
-  - [ ] [RESTful API设计准则](#restful-api设计准则)
-  - [ ] [swagger注解总结](#swagger注解总结)
+  - [x] [RESTful API设计准则](#restful-api设计准则)
+  - [x] [swagger注解总结](#swagger注解总结)
   - [ ] [快速上手](#快速上手-1)
 - [ ] Spring Boot 集成 MyBatis
 - [ ] MyBatis Druid 多数据源
@@ -665,6 +665,22 @@ public class Application extends SpringBootServletInitializer {
 
 ## RESTful API设计准则
 
+现在越来越多的项目开始进行前后端分离，那为了方便前后端进行通信，就需要一套 API 准则，RESTful API 是目前比较成熟的一套互联网应用程序的 API 设计理论，RESTful API具体设计如下：
+
+| 请求类型    | URL         |   功能说明           |
+| :--------:   | :-----:      |   :----:          |
+| GET        | /users      |   查询用户列表        |
+| POST       | /users      |   创建一个用户        |
+| GET        | /users/id   |   根据id查询一个用户  |
+| PUT        | /users/id   |   根据id更新一个用户  |
+| DELETE     | /users/id   |   根据id删除一个用户  |
+
+如果对RESTful API设计准则还不是很清楚的话，推荐可以看下阮一峰老师的博文：[《RESTful API 设计指南》](http://www.ruanyifeng.com/blog/2014/05/restful_api.html)，便会对RESTful API 有个大概的了解。
+
 ## swagger注解总结
+
+这里就不详述了，我之前有写过总结这些注解的一篇文章，当然也可以参考官方的文档，链接如下：
+- [swagger注解总结](http://www.leeyom.top/2017/09/25/tech-swagger-annotation/)
+- [Swagger Core Annotations](https://github.com/swagger-api/swagger-core/wiki/Annotations-1.5.X)
 
 ## 快速上手
