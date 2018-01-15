@@ -778,7 +778,8 @@ public class Application extends SpringBootServletInitializer {
       @ApiOperation(value = "更新用户详细信息"
       , notes = "根据url的id来指定更新对象，并根据传过来的user信息来更新用户详细信息")
       @ApiImplicitParams({
-              @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long", paramType = "path")
+              @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long"
+              , paramType = "path")
       })
       @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
       public String updateUser(@PathVariable Long id, @ApiParam(value = "更新实体封装", required = true)
