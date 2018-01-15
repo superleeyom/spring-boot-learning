@@ -684,3 +684,127 @@ public class Application extends SpringBootServletInitializer {
 - [Swagger Core Annotations](https://github.com/swagger-api/swagger-core/wiki/Annotations-1.5.X)
 
 ## 快速上手
+
+- 添加`swagger2`依赖：
+  ```xml
+  <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger2</artifactId>
+      <version>2.4.0</version>
+  </dependency>
+  <dependency>
+      <groupId>io.springfox</groupId>
+      <artifactId>springfox-swagger-ui</artifactId>
+      <version>2.4.0</version>
+  </dependency>
+  ```
+- 创建`swagger2`配置`SwaggerConfig.java`，设置API接口扫描包、作者、版本等等相关信息：
+  ```java
+  @Configuration
+  @EnableSwagger2
+  public class SwaggerConfig {
+
+      @Bean
+      public Docket createRestApi() {
+          return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
+                  .apis(RequestHandlerSelectors.basePackage("com.leeyom.controller"))
+                  .paths(PathSelectors.any())
+                  .build();
+      }
+
+      private ApiInfo apiInfo() {
+          return new ApiInfoBuilder()
+                  .title("Spring Boot中使用Swagger2构建RESTful API")
+                  .description("更多Spring Boot相关文章请关注：http://leeyom.top/")
+                  .termsOfServiceUrl("http://leeyom.top/")
+                  .contact("Leeyom")
+                  .version("1.0")
+                  .build();
+      }
+  }  
+  ```
+- 添加文档：
+  ```java
+  @Api(description = "用户管理", tags = "UserController", basePath = "/user")
+  @RestController
+  @RequestMapping(value = "/user")
+  public class UserController {
+      /**
+       * 创建一个线程安全的map，模拟数据库，存放用户信息
+       */
+      static Map<Long, User> users = new HashMap<>();
+
+      /**
+       * 获取用户列表
+       * @return
+       */
+      @ApiOperation(value = "获取用户列表", notes = "获取所有用户信息")
+      @RequestMapping(value = "/", method = RequestMethod.GET)
+      public List<User> getUserList() {
+          List<User> userList = new ArrayList<User>(users.values());
+          return userList;
+      }
+
+      /**
+       * 新增用户
+       * @param user 新增用户实体
+       * @return
+       */
+      @ApiOperation(value = "创建用户", notes = "根据User对象创建用户")
+      @RequestMapping(value = "/", method = RequestMethod.POST)
+      public String addUser(@ApiParam(value = "新增用户实体封装", required = true) @RequestBody User user) {
+          users.put(user.getId(), user);
+          return "success";
+      }
+
+      /**
+       * 获取用户信息
+       * @param id 用户主键id
+       * @return
+       */
+      @ApiOperation(value = "获取用户详细信息", notes = "根据url的id来获取用户详细信息")
+      @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long", paramType = "path")
+      @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+      public User getUser(@PathVariable Long id) {
+          return users.get(id);
+      }
+
+      /**
+       * 更新用户
+       * @param id   用户id
+       * @param user 更新实体封装
+       * @return
+       */
+      @ApiOperation(value = "更新用户详细信息"
+      , notes = "根据url的id来指定更新对象，并根据传过来的user信息来更新用户详细信息")
+      @ApiImplicitParams({
+              @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long", paramType = "path")
+      })
+      @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+      public String updateUser(@PathVariable Long id, @ApiParam(value = "更新实体封装", required = true)
+      @RequestBody User user) {
+          User oldUser = users.get(id);
+          oldUser.setAge(user.getAge());
+          oldUser.setName(user.getName());
+          users.put(id, oldUser);
+          return "success";
+      }
+
+      /**
+       * 删除用户
+       * @param id 用户id
+       * @return
+       */
+      @ApiOperation(value = "删除用户", notes = "根据url的id来指定删除对象")
+      @ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "Long", paramType = "path")
+      @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+      public String deleteUser(@PathVariable Long id) {
+          users.remove(id);
+          return "success";
+      }
+  }
+  ```
+- 启动Spring Boot程序，访问：[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)，出现如下的结果：
+  ![API接口文档](http://image.leeyom.top/blog/180115/c1Ggail8Jh.png)
+- SSM架构的项目中，整合swagger可以参考我以前的写一篇博文，就是配置那里有点小区别，其他的没啥区别。
+  - [Spring MVC中使用Swagger2构建Restful API](http://www.leeyom.top/2017/09/23/tech-spring-mvc-swagger2/)
