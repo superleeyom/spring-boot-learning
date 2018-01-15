@@ -37,7 +37,7 @@
   - [x] [快速上手](#快速上手-1)
 - [ ] [Spring Boot 集成 MyBatis](#spring-boot-集成-myBatis)
   - [ ] [Mybatis原理简介](#mybatis原理简介)
-  - [ ] [Mybatis官方组件包使用](#mybatis官方组件包使用)
+  - [ ] [官方组件包使用](#mybatis官方组件包使用)
     - [ ] [XML版本](#xml版本)
     - [ ] [注解版本](#注解版本)
   - [ ] [第三方组件包使用](#第三方组件包使用)
