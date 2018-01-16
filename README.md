@@ -606,31 +606,32 @@ public void testPageQuery() {
   ```
 
 ## 常用标签汇总
-| 关键字         | 功能介绍           | 案例                                                    |
-| ------------- |:------------------:| -------------------------------------------------------|
-| `th:id`       | 替换id             | `<input th:id="'xxx' + ${collect.id}"/>`               |
-| `th:text`     | 文本替换           |  `<p th:text="${collect.description}">description</p>`  |
-| `th:utext`    | 支持html的文本替换  |    `<p th:utext="${htmlcontent}">conten</p>`           |
-| `th:object`   | 替换对象           |    `<div th:object="${session.user}">`                 |
-| `th:value`    | 属性赋值           |    `<input th:value="${user.name}" />`                 |
-| `th:with`     | 变量赋值运算       |    `<div th:with="isEven=${prodStat.count}%2==0"></div>` |
-| `th:style`    | 设置样式           |    `th:style="'display:' + @{(${sitrue} ? 'none' : 'inline-block')} + ''"`           |
-| `th:onclick`  | 点击事件           |    `th:onclick="'getCollect()'"`                       |
-| `th:each`     |  循环             |    `<tr th:each="user,userStat:${users}">`              |
-| `th:if`       |  条件判断          |    `<a th:if="${userId == collect.userId}" >`          |
-| `th:unless`   |  和th:if判断相反   |    `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a>`           |
-| `th:href`     | 链接地址           |    `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a> />`           |
-| `th:switch`   | 多路选择 配合th:case 使用         |    `<div th:switch="${user.role}">`          |
-| `th:case`   | th:switch的一个分支         |    `<p th:case="'admin'">User is an administrator</p>`          |
-| `th:fragment`   | 布局标签，定义一个代码片段，方便其它地方引用         |    `<div th:fragment="alert">`          |
-| `th:include`   | 布局标签，替换内容到引入的文件  | `<head th:include="layout :: htmlhead" th:with="title='xx'"></head> />`          |
-| `th:replace`   | 布局标签，替换整个标签到引入的文件         |    `<div th:replace="fragments/header :: title"></div>`          |
-| `th:selected`   | selected选择框选中         |    `th:selected="(${xxx.id} == ${configObj.dd})"`          |
-| `th:src`   | 图片类地址引入         |    `<img class="img-responsive" alt="App Logo" th:src="@{/img/logo.png}" />`          |
-| `th:inline`   | 定义js脚本可以使用变量    |    `<script type="text/javascript" th:inline="javascript">`          |
-| `th:action`   | 表单提交的地址    |    `<form action="subscribe.html" th:action="@{/subscribe}">`          |
-| `th:remove`   | 删除某个属性    |    `<tr th:remove="all/body/tag/all-but-first/none">`          |
-| `th:attr`   | 设置标签属性，多个属性可以用逗号分隔    |    `th:attr="src=@{/image/aa.jpg},title=#{logo}"`          |
+| 关键字   | 功能介绍 |  案例  |
+| :-: | :-: | :-: |
+| `th:id` | 替换id   | `<input th:id="'xxx' + ${collect.id}"/>` |
+| `th:text` | 文本替换 | `<p th:text="${collect.description}">description</p>` |
+| `th:utext` | 支持html的文本替换 | `<p th:utext="${htmlcontent}">conten</p>`  |
+| `th:object` | 替换对象 | `<div th:object="${session.user}">` |
+| `th:value` | 属性赋值 | `<input th:value="${user.name}" />` |
+| `th:with` | 变量赋值运算 | `<div th:with="isEven=${prodStat.count}%2==0"></div>` |
+| `th:style` | 设置样式 | `th:style="'display:' + @{(${sitrue} ? 'none' : 'inline-block')} + ''"` |
+| `th:onclick` | 点击事件 | `th:onclick="'getCollect()'"` |
+| `th:each` |  循环 | `<tr th:each="user,userStat:${users}">` |
+| `th:if` | 条件判断 | `<a th:if="${userId == collect.userId}" >` |
+| `th:unless` | 和th:if判断相反 | `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a>` |
+| `th:href` | 链接地址 | `<a th:href="@{/login}" th:unless=${session.user != null}>Login</a> />` |
+| `th:switch` | 多路选择 配合th:case 使用 |  `<div th:switch="${user.role}">` |
+| `th:case` | th:switch的一个分支 | `<p th:case="'admin'">User is an administrator</p>` |
+| `th:fragment` | 布局标签，定义一个代码片段，方便其它地方引用 | `<div th:fragment="alert">` |
+| `th:include` | 布局标签，替换内容到引入的文件 | `<head th:include="layout :: htmlhead" th:with="title='xx'"></head> />` |
+| `th:replace` | 布局标签，替换整个标签到引入的文件 | `<div th:replace="fragments/header :: title"></div>` |
+| `th:selected` | selected选择框选中 | `th:selected="(${xxx.id} == ${configObj.dd})"` |
+| `th:src`  | 图片类地址引入  | `<img class="img-responsive" alt="App Logo" th:src="@{/img/logo.png}" />`  |
+| `th:inline` | 定义js脚本可以使用变量 | `<script type="text/javascript" th:inline="javascript">` |
+| `th:action` | 表单提交的地址  | `<form action="subscribe.html" th:action="@{/subscribe}">` |
+| `th:remove` | 删除某个属性 | `<tr th:remove="all/body/tag/all-but-first/none">`  |
+| `th:attr` | 设置标签属性，多个属性可以用逗号分隔 | `th:attr="src=@{/image/aa.jpg},title=#{logo}"` |
+
 
 # JPA 和 Thymeleaf 实践
 
@@ -675,9 +676,9 @@ public class Application extends SpringBootServletInitializer {
 现在越来越多的项目开始进行前后端分离，那为了方便前后端进行通信，就需要一套 API 准则，RESTful API 是目前比较成熟的一套互联网应用程序的 API 设计理论，RESTful API具体设计如下：
 
 | 请求类型    | URL         |   功能说明           |
-| :--------:   | :-----:      |   :----:          |
-| GET        | /users      |   查询用户列表        |
-| POST       | /users      |   创建一个用户        |
+| :--------:   | :-----:      |   :----:        |
+| GET        | /users      |   查询用户列表       |
+| POST       | /users      |   创建一个用户       |
 | GET        | /users/id   |   根据id查询一个用户  |
 | PUT        | /users/id   |   根据id更新一个用户  |
 | DELETE     | /users/id   |   根据id删除一个用户  |
