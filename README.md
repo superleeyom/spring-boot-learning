@@ -36,7 +36,7 @@
   - [x] [swagger注解总结](#swagger注解总结)
   - [x] [快速上手](#快速上手-1)
 - [ ] [Spring Boot 集成 MyBatis](#spring-boot-集成-myBatis)
-  - [ ] [Mybatis原理简介](#mybatis原理简介)
+  - [x] [Mybatis原理简介](#mybatis原理简介)
   - [ ] [官方组件包使用](#mybatis官方组件包使用)
     - [ ] [XML版本](#xml版本)
     - [ ] [注解版本](#注解版本)
@@ -817,3 +817,31 @@ public class Application extends SpringBootServletInitializer {
   ![API接口文档](http://image.leeyom.top/blog/180115/c1Ggail8Jh.png)
 - SSM架构的项目中，整合swagger可以参考我以前的写一篇博文，就是配置那里有点小区别，其他的没啥区别。
   - [Spring MVC中使用Swagger2构建Restful API](http://www.leeyom.top/2017/09/23/tech-spring-mvc-swagger2/)
+
+# Spring Boot 集成 MyBatis
+
+## Mybatis原理简介
+
+MyBatis的工作流程如下：
+- 首先加载mapper配置的sql映射文件，或者注解相关的sql内容。
+- 通过读取配置文件，创建会话工厂 SqlSessionFactory。
+- 然后通过会话工厂，创建会话对象 SqlSession，会话对象其实就是一个接口，是对某个数据库增删改查的封装。
+- 创建执行器 Executor 。
+- 封装sql对象，执行器将待处理的 SQL 信息封装到 MappedStatement 对象中，该对象包括 SQL 语句、输入参数映射信息和输出结果映射信息。
+- 正式开始操作数据库，返回操作结果，结束流程。
+
+流程图如下：
+
+![mybatis工作流程图](http://image.leeyom.top/2018012315167174589667.png)
+
+## 官方组件包使用
+
+### XML版本
+
+### 注解版本
+
+## 第三方组件包使用
+
+### 集成分页插件 PageHelper
+
+### 集成通用 Mapper 插件
