@@ -12,37 +12,45 @@
   - [x] [官方推荐目录](#官方推荐目录)
   - [x] [热部署](#热部署)
   - [x] [实例中涉及到的注解](#实例中涉及到的注解)
+  - [x] [项目源码](#项目源码)
 - [x] [快速Web开发](#快速web开发)
   - [x] [Json的支持](#json的支持)
   - [x] [请求传参](#请求传参)
   - [x] [参数校验](#参数校验)
   - [x] [自定义过滤器](#自定义过滤器)
   - [x] [读取Properties](#读取properties)
+  - [x] [项目源码](#项目源码-1)
 - [x] [Spring Data JPA 的使用](#spring-data-jpa-的使用)
   - [x] [JPA简单概念](#jpa简单概念)
   - [x] [快速上手](#快速上手)
   - [x] [基本查询](#基本查询)
   - [x] [复杂查询](#复杂查询)
   - [x] [关联查询](#关联查询)
+  - [x] [项目源码](#项目源码-2)
 - [x] [模板引擎Thymeleaf](#模板引擎-thymeleaf)
   - [x] [简单上手](#简单上手)
   - [x] [常用标签汇总](#常用标签汇总)
+  - [x] [项目源码](#项目源码-3)
 - [x] [JPA 和 Thymeleaf 实践](#jpa-和-thymeleaf-实践)
   - [x] [多环境配置](#多环境配置)
   - [x] [添加Servlet支持](#添加servlet支持)
   - [x] [效果图](#效果图)
+  - [x] [项目源码](#项目源码-4)
 - [x] [使用Swagger2构建RESTful API 文档](#使用swagger2构建restful-api-文档)
   - [x] [RESTful API设计准则](#restful-api设计准则)
   - [x] [swagger注解总结](#swagger注解总结)
   - [x] [快速上手](#快速上手-1)
+  - [x] [项目源码](#项目源码-5)
 - [ ] [Spring Boot 集成 MyBatis](#spring-boot-集成-myBatis)
   - [x] [Mybatis原理简介](#mybatis原理简介)
   - [ ] [官方组件包使用](#mybatis官方组件包使用)
     - [ ] [XML版本](#xml版本)
     - [ ] [注解版本](#注解版本)
+    - [ ] [项目源码](#项目源码-6)
   - [ ] [第三方组件包使用](#第三方组件包使用)
     - [ ] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
     - [ ] [集成通用 Mapper 插件](#集成通用-mapper-插件)
+    - [ ] [项目源码](#项目源码-7)
 - [ ] MyBatis Druid 多数据源
 - [ ] 集成 Redis 实现数据缓存和 Session 共享
 - [ ] 集成 dubbo+zookeeper
@@ -151,6 +159,9 @@ spring boot官方建议的目录如下：
         }
     }
     ```
+## 项目源码
+
+源码参考：[spring-boot-helloworld](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-helloworld)
 
 # 快速Web开发
 
@@ -344,6 +355,10 @@ public void testProperties() throws Exception {
 title:leeyom
 description:一只有梦想的咸鱼
 ```
+
+## 项目源码
+
+源码参考：[spring-boot-fastweb](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-fastweb)
 
 # Spring Data JPA 的使用
 
@@ -542,6 +557,10 @@ public void testPageQuery() {
   addree Hong Kong
   ```
 
+## 项目源码
+
+源码参考：[spring-boot-jpa](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-jpa)
+
 # 模板引擎 Thymeleaf
 
 ## 简单上手
@@ -632,6 +651,9 @@ public void testPageQuery() {
 | `th:remove` | 删除某个属性 | `<tr th:remove="all/body/tag/all-but-first/none">`  |
 | `th:attr` | 设置标签属性，多个属性可以用逗号分隔 | `th:attr="src=@{/image/aa.jpg},title=#{logo}"` |
 
+## 项目源码
+
+源码参考：[spring-boot-thymeleaf](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-thymeleaf)
 
 # JPA 和 Thymeleaf 实践
 
@@ -668,6 +690,10 @@ public class Application extends SpringBootServletInitializer {
   ![编辑用户](http://image.leeyom.top/blog/180113/0DE7GdAaae.png)
 - 删除用户：
   ![删除用户](http://image.leeyom.top/blog/180113/FmagcGG1gd.png)
+
+## 项目源码
+
+源码参考：[spring-boot-jpa-thymeleaf](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-jpa-thymeleaf)
 
 # 使用Swagger2构建RESTful API 文档
 
@@ -818,6 +844,10 @@ public class Application extends SpringBootServletInitializer {
 - SSM架构的项目中，整合swagger可以参考我以前的写一篇博文，就是配置那里有点小区别，其他的没啥区别。
   - [Spring MVC中使用Swagger2构建Restful API](http://www.leeyom.top/2017/09/23/tech-spring-mvc-swagger2/)
 
+## 项目源码
+
+源码参考：[spring-boot-restful-swagger](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-restful-swagger)
+
 # Spring Boot 集成 MyBatis
 
 ## Mybatis原理简介
@@ -840,8 +870,12 @@ MyBatis的工作流程如下：
 
 ### 注解版本
 
+### 项目源码
+
 ## 第三方组件包使用
 
 ### 集成分页插件 PageHelper
 
 ### 集成通用 Mapper 插件
+
+### 项目源码
