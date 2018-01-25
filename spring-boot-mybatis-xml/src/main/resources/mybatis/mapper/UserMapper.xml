@@ -1,18 +1,71 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.leeyom.mapper.UserMapper" >
-    <resultMap id="BaseResultMap" type="com.leeyom.pojo.User" >
-        <id column="id" property="id" jdbcType="BIGINT" />
-        <result column="user_name" property="userName" jdbcType="VARCHAR" />
-        <result column="password" property="password" jdbcType="VARCHAR" />
-        <result column="user_sex" property="userSex" javaType="com.leeyom.enums.UserSexEnum"/>
-        <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+<mapper namespace="com.leeyom.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.leeyom.pojo.User">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="user_sex" property="userSex" jdbcType="VARCHAR"/>
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR"/>
     </resultMap>
-    
-    <sql id="Base_Column_List" >
+
+    <!--删除-->
+    <delete id="deleteByPrimaryKey" parameterType="Integer">
+    delete from users
+    where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <!--新增-->
+    <insert id="insert" parameterType="com.leeyom.pojo.User">
+    insert into users (id, user_name, password, 
+      user_sex, nick_name)
+    values (#{id,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{userSex,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR})
+  </insert>
+
+    <!--更新-->
+    <update id="updateByPrimaryKey" parameterType="com.leeyom.pojo.User">
+    update users
+    set user_name = #{userName,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      user_sex = #{userSex,jdbcType=VARCHAR},
+      nick_name = #{nickName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <!--查询指定用户-->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from users
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <!--查询所有-->
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from users
+    </select>
+
+
+    <!--分页查询-->
+    <select id="getUserListByPage" resultMap="BaseResultMap" parameterType="com.leeyom.param.UserParam">
+        select
+        <include refid="Base_Column_List"/>
+        from users
+        where 1=1
+        <include refid="Base_Where_List"/>
+        order by id desc
+        limit #{pageNumber} , #{pageSize}
+    </select>
+
+    <!--查询结果封装-->
+    <sql id="Base_Column_List">
         id, user_name, password, user_sex, nick_name
     </sql>
 
+    <!--条件查询封装-->
     <sql id="Base_Where_List">
         <if test="userName != null  and userName != ''">
             and user_name = #{userName}
@@ -21,62 +74,4 @@
             and user_sex = #{userSex}
         </if>
     </sql>
-
-    <select id="getAll" resultMap="BaseResultMap"  >
-       SELECT 
-       <include refid="Base_Column_List" />
-	   FROM users
-    </select>
-
-    <select id="getList" resultMap="BaseResultMap" parameterType="com.leeyom.UserParam">
-        select
-        <include refid="Base_Column_List" />
-        from users
-        where 1=1
-        <include refid="Base_Where_List" />
-        order by id desc
-        limit #{beginLine} , #{pageSize}
-    </select>
-
-    <select id="getCount" resultType="Integer" parameterType="com.leeyom.UserParam">
-        select
-        count(1)
-        from users
-        where 1=1
-        <include refid="Base_Where_List" />
-    </select>
-
-    <select id="getOne" parameterType="Long" resultMap="BaseResultMap" >
-        SELECT 
-       <include refid="Base_Column_List" />
-	   FROM users
-	   WHERE id = #{id}
-    </select>
-
-    <insert id="insert" parameterType="com.leeyom.pojo.User" >
-       INSERT INTO 
-       		users
-       		(user_ame,password,user_sex)
-       	VALUES
-       		(#{userName}, #{password}, #{userSex})
-    </insert>
-    
-    <update id="update" parameterType="com.leeyom.pojo.User" >
-       UPDATE 
-       		users 
-       SET 
-       	<if test="userName != null">user_name = #{userName},</if>
-       	<if test="passWord != null">password = #{password},</if>
-       	nick_name = #{nickName}
-       WHERE 
-       		id = #{id}
-    </update>
-    
-    <delete id="delete" parameterType="Long" >
-       DELETE FROM
-       		 users 
-       WHERE 
-       		 id =#{id}
-    </delete>
-
 </mapper>

@@ -6,18 +6,16 @@ import com.leeyom.pojo.User;
 import java.util.List;
 
 public interface UserMapper {
-    List<User> getAll();
 
-    List<User> getList(UserParam userParam);
+    int deleteByPrimaryKey(Integer id);
 
-    int getCount(UserParam userParam);
+    int insert(User record);
 
-    User getOne(Long id);
+    User selectByPrimaryKey(Integer id);
 
-    void insert(User user);
+    List<User> selectAll();
 
-    int update(User user);
+    int updateByPrimaryKey(User record);
 
-    int delete(Long id);
-
+    List<User> getUserListByPage(UserParam userParam);
 }

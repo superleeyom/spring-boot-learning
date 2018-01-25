@@ -1,24 +1,21 @@
 package com.leeyom.pojo;
 
+public class User {
+    private Integer id;
 
-import com.leeyom.enums.UserSexEnum;
-
-import java.io.Serializable;
-
-public class User implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    private Long id;
     private String userName;
+
     private String password;
-    private UserSexEnum userSex;
+
+    private String userSex;
+
     private String nickName;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -27,7 +24,7 @@ public class User implements Serializable {
     }
 
     public void setUserName(String userName) {
-        this.userName = userName;
+        this.userName = userName == null ? null : userName.trim();
     }
 
     public String getPassword() {
@@ -35,15 +32,15 @@ public class User implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = password == null ? null : password.trim();
     }
 
-    public UserSexEnum getUserSex() {
+    public String getUserSex() {
         return userSex;
     }
 
-    public void setUserSex(UserSexEnum userSex) {
-        this.userSex = userSex;
+    public void setUserSex(String userSex) {
+        this.userSex = userSex == null ? null : userSex.trim();
     }
 
     public String getNickName() {
@@ -51,17 +48,31 @@ public class User implements Serializable {
     }
 
     public void setNickName(String nickName) {
+        this.nickName = nickName == null ? null : nickName.trim();
+    }
+
+    public User() {
+    }
+
+    public User(String userName, String password, String userSex, String nickName) {
+        this.userName = userName;
+        this.password = password;
+        this.userSex = userSex;
         this.nickName = nickName;
     }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", userSex=" + userSex +
-                ", nickName='" + nickName + '\'' +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(" [");
+        sb.append("Hash = ").append(hashCode());
+        sb.append(", id=").append(id);
+        sb.append(", userName=").append(userName);
+        sb.append(", password=").append(password);
+        sb.append(", userSex=").append(userSex);
+        sb.append(", nickName=").append(nickName);
+        sb.append("]");
+        return sb.toString();
     }
 }

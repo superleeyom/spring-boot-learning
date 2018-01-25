@@ -21,4 +21,10 @@ public class UserParam extends PageParam {
     public void setUserSex(String userSex) {
         this.userSex = userSex;
     }
+
+    public UserParam(Integer pageSize, Integer pageNumber, String userName, String userSex) {
+        super(pageSize, pageNumber);
+        this.userName = userName;
+        this.userSex = userSex;
+    }
 }

@@ -868,6 +868,128 @@ MyBatis的工作流程如下：
 
 ### XML版本
 
+- 引入mybatis核心依赖：
+  ```xml
+  <dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>1.3.1</version>
+  </dependency>
+  ```
+  除了mybatis的核心依赖，还需要mysql数据库驱动包`mysql-connector-java`等等，这里就不贴出来了，完整的可以看项目源码。
+- 配置`application.properties`，主要是配置mybatis和数据库连接：
+  ```properties
+  # mybatis
+  mybatis.config-location=classpath:mybatis/mybatis-config.xml
+  mybatis.mapper-locations=classpath:mybatis/mapper/*.xml
+  mybatis.type-aliases-package=com.leeyom.pojo
+
+  # dataSource
+  spring.datasource.driverClassName=com.mysql.jdbc.Driver
+  spring.datasource.url=jdbc:mysql://localhost:3306/spring-boot-mybatis
+  ?useUnicode=true&characterEncoding=utf-8
+  spring.datasource.username=root
+  spring.datasource.password=root  
+  ```
+  - `mybatis.config-location`：配置 `mybatis-config.xml` 路径，`mybatis-config.xml` 中配置 MyBatis 基础属性。
+  - `mybatis.mapper-locations`：配置 Mapper 对应的 XML 文件路径。
+  - `mybatis.type-aliases-package`：配置项目中实体类包路径。
+  - `spring.datasource.*`：数据源配置。
+- 配置 `mybatis-config.xml`：
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+  <configuration>
+      <!--配置别名-->
+      <typeAliases>
+          <typeAlias alias="Integer" type="java.lang.Integer"/>
+          <typeAlias alias="Long" type="java.lang.Long"/>
+          <typeAlias alias="HashMap" type="java.util.HashMap"/>
+          <typeAlias alias="LinkedHashMap" type="java.util.LinkedHashMap"/>
+          <typeAlias alias="ArrayList" type="java.util.ArrayList"/>
+          <typeAlias alias="LinkedList" type="java.util.LinkedList"/>
+      </typeAliases>
+  </configuration>  
+  ```
+  该配置文件的主要作用是配置mybatis的基础属性，比如这里可以设置别名，也还可以设置第三方分页等等。设置别名的好处就是，打个比方在编写mapper.xml的时候
+  ```java
+  resultType="java.lang.Integer"
+  ```
+  可以简写为：
+  ```java
+  resultType="Integer"
+  ```
+- 配置包扫描器，在spring boot的启动类上面添加注解`@MapperScan("com.leeyom.mapper")`，`com.leeyom.mapper`为mapper接口的package路径。
+  ```java
+  @SpringBootApplication
+  @MapperScan("com.leeyom.mapper")
+  public class Application {
+
+      public static void main(String[] args) {
+          SpringApplication.run(Application.class, args);
+      }
+  }  
+  ```
+- 编写 UserMapper.xml，其实我觉得xml方式的的最大的好处就是可以复写sql，可以将重复使用的sql抽离出来，例如这里我抽离两个sql：
+  ```xml
+  <!--查询结果封装-->
+  <sql id="Base_Column_List">
+      id, user_name, password, user_sex, nick_name
+  </sql>
+
+  <!--条件查询封装-->
+  <sql id="Base_Where_List">
+      <if test="userName != null  and userName != ''">
+          and user_name = #{userName}
+      </if>
+      <if test="userSex != null and userSex != ''">
+          and user_sex = #{userSex}
+      </if>
+  </sql>  
+  ```
+  然后在其他的sql里面进行复用：
+  ```xml
+  <!--查询所有-->
+  <select id="selectAll" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List"/>
+      from users
+  </select>
+
+
+  <!--分页查询-->
+  <select id="getUserListByPage" resultMap="BaseResultMap" parameterType="com.leeyom.param.UserParam">
+      select
+      <include refid="Base_Column_List"/>
+      from users
+      where 1=1
+      <include refid="Base_Where_List"/>
+      order by id desc
+      limit #{pageNumber} , #{pageSize}
+  </select>  
+  ```
+  是不是简化了sql的代码呢？
+- 编写 UserMapper.java：
+  ```java
+  public interface UserMapper {
+
+      int deleteByPrimaryKey(Integer id);
+
+      int insert(User record);
+
+      User selectByPrimaryKey(Integer id);
+
+      List<User> selectAll();
+
+      int updateByPrimaryKey(User record);
+
+      List<User> getUserListByPage(UserParam userParam);
+  }  
+  ```
+
+- 这个就是spring boot 集成mybatis的以xml方式操作数据库，虽然说配置要有点多，但是xml的方式可以极大的复用sql，并且可以高度定制化sql，sql语句与java代码解耦，在实际的开发中使用的还是蛮多的。像UserMapper.java、User.java、UserMapper.xml我们都可以使用[mybatis-generator](https://github.com/wangleeyom/mybatis-generator)自动生成，还是挺方便的。
+
 ### 注解版本
 
 ### 项目源码
