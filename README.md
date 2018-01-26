@@ -45,8 +45,8 @@
   - [x] [Mybatis原理简介](#mybatis原理简介)
   - [x] [官方组件包使用](#官方组件包使用)
     - [x] [XML版本](#xml版本)
-    - [ ] [注解版本](#注解版本)
-    - [ ] [项目源码](#项目源码-6)
+    - [x] [注解版本](#注解版本)
+    - [x] [项目源码](#项目源码-6)
   - [ ] [第三方组件包使用](#第三方组件包使用)
     - [ ] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
     - [ ] [集成通用 Mapper 插件](#集成通用-mapper-插件)
@@ -992,7 +992,94 @@ MyBatis的工作流程如下：
 
 ### 注解版本
 
+- 注解版本其实就是xml版本的简化，不再需要`UserMapper.xml`、`mybatis-config.xml`等相关的xml配置文件，只需要在`application.properties`配置映射实体类所在的package。
+  ```properties
+  # mybatis
+  mybatis.type-aliases-package=com.leeyom.pojo  
+  ```
+- 对应的sql写在Mapper中：
+  ```java
+  public interface UserMapper {
+
+      @Delete("DELETE FROM users WHERE id =#{id}")
+      int deleteByPrimaryKey(Integer id);
+
+      @Insert("INSERT INTO users(user_name,password,user_sex,nick_name)
+      VALUES(#{userName}, #{password}, #{userSex} ,#{nickName})")
+      int insert(User record);
+
+      @Select("SELECT * FROM users WHERE id = #{id}")
+      User selectByPrimaryKey(Integer id);
+
+      @Select("SELECT * FROM users")
+      @Results({
+              @Result(property = "userSex", column = "user_sex"),
+              @Result(property = "nickName", column = "nick_name")
+      })
+      List<User> selectAll();
+
+      @Update("UPDATE users SET user_name=#{userName},password=#{password},user_sex=#{userSex},
+      nick_name=#{nickName} WHERE id =#{id}")
+      int updateByPrimaryKey(User record);
+
+      @SelectProvider(type = UserSql.class, method = "getUserListByPage")
+      List<User> getUserListByPage(UserParam userParam);
+
+
+      @SelectProvider(type = UserSql.class, method = "getCount")
+      Long getCount(UserParam userParam);
+  }  
+  ```
+  建议使用#，使用$有 SQL 注入的可能性！
+
+- 对于动态的sql，mybatis也做出了相应的优化，他的主要原理还是拼接sql，创建一个动态的sql类`UserSql.java`，添加如下的方法：
+  ```java
+  public String getUserListByPage(UserParam userParam) {
+         StringBuffer sql = new StringBuffer("select id, user_name, password, user_sex, nick_name");
+         sql.append(" from users where 1=1 ");
+         if (userParam != null) {
+             if (StringUtils.isNotBlank(userParam.getUserName())) {
+                 sql.append(" and user_name = #{userName}");
+             }
+             if (StringUtils.isNotBlank(userParam.getUserSex())) {
+                 sql.append(" and user_sex = #{userSex}");
+             }
+         }
+         sql.append(" order by id desc");
+         sql.append(" limit " + userParam.getPageNumber() + "," + userParam.getPageSize());
+         log.info("getUserListByPage sql is :" + sql.toString());
+         return sql.toString();
+     }  
+  ```
+  然后在Mapper里面：
+  ```java
+  @SelectProvider(type = UserSql.class, method = "getUserListByPage")
+  List<User> getUserListByPage(UserParam userParam);  
+  ```
+  当然这样拼接是非常繁琐的，mybatis也推出了结构化SQL来解决这个问题，如下所示：
+  ```java
+  public String getCount(UserParam userParam) {
+      String sql = new SQL() {{
+          SELECT("count(1)");
+          FROM("users");
+          if (StringUtils.isNotBlank(userParam.getUserName())) {
+              WHERE("user_name = #{userName}");
+          }
+          if (StringUtils.isNotBlank(userParam.getUserSex())) {
+              WHERE("user_sex = #{userSex}");
+          }
+      }}.toString();
+
+      log.info("getCount sql is :" + sql);
+      return sql;
+  }  
+  ```
+- 以上便是以注解的方式操作数据库，其实根据个人的使用经验，我个人倾向于XML的方式，因为XML方法是可以痛快的写SQL语句，结构化清晰，并且sql语句不会过度的耦合到java代码中。注解版本对于业务逻辑不是很复杂的可以采用，但是像一些比较复杂的sql注解也就不太好处理。
+
 ### 项目源码
+
+- xml方式：[spring-boot-mybatis-xml](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-xml)
+- 注解方式: [spring-boot-mybatis-annotation](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-annotation)
 
 ## 第三方组件包使用
 
