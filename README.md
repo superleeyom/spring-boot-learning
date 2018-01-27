@@ -48,6 +48,7 @@
     - [x] [注解版本](#注解版本)
     - [x] [项目源码](#项目源码-6)
   - [ ] [第三方组件包使用](#第三方组件包使用)
+    - [ ] [集成 mybatis generator](#集成-mybatis-generator)
     - [ ] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
     - [ ] [集成通用 Mapper 插件](#集成通用-mapper-插件)
     - [ ] [项目源码](#项目源码-7)
@@ -1082,6 +1083,8 @@ MyBatis的工作流程如下：
 - 注解方式: [spring-boot-mybatis-annotation](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-annotation)
 
 ## 第三方组件包使用
+
+### 集成 mybatis generator
 
 ### 集成分页插件 PageHelper
 
