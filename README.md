@@ -1204,7 +1204,7 @@ mybatis generator 插件主要用于生成pojo、Mapper、Mapper.xml文件，简
   ```
 
 - 使用IDEA的maven插件运行 mybatis generator 插件：
-  ![mark](http://image.leeyom.top/blog/180130/h4kheA6CJC.png)
+  - ![20180130151731298433418.png](http://image.leeyom.top/20180130151731298433418.png)
 - eclipse开发工具的话，使用命令：`mvn mybatis-generator:generate`执行项目。
 
 - 更加具体的使用可以参考通用mapper插件文档：[https://mapperhelper.github.io/docs/3.usembg/](https://mapperhelper.github.io/docs/3.usembg/)
@@ -1324,7 +1324,8 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
 }
 ```
 最终的结果：
-![mark](http://image.leeyom.top/blog/180130/7j40AKfD89.png)
+
+![20180130151731290114844.png](http://image.leeyom.top/20180130151731290114844.png)
 
 对于分页插件PageHelper更多的资料可以查看其官网：[https://pagehelper.github.io/](https://pagehelper.github.io/)。
 
