@@ -1324,7 +1324,7 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
 }
 ```
 最终的结果：
-![mark](http://image.leeyom.top/blog/180130/2997KdlfFI.png)
+![mark](http://image.leeyom.top/blog/180130/7j40AKfD89.png)
 
 对于分页插件PageHelper更多的资料可以查看其官网：[https://pagehelper.github.io/](https://pagehelper.github.io/)。
 
