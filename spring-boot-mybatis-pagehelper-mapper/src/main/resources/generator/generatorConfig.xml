@@ -14,10 +14,10 @@
             <property name="mappers" value="com.leeyom.mybatis.util.MyMapper"/>
         </plugin>
 
-        <jdbcConnection driverClass="${druid.driver-class}"
-                        connectionURL="${druid.url}"
-                        userId="${druid.username}"
-                        password="${druid.password}">
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/mybatis-test2"
+                        userId="root"
+                        password="root">
         </jdbcConnection>
 
         <javaModelGenerator targetPackage="com.leeyom.mybatis.model" targetProject="src/main/java"/>
@@ -26,9 +26,9 @@
 
         <javaClientGenerator targetPackage="com.leeyom.mybatis.mapper" targetProject="src/main/java"
                              type="XMLMAPPER"/>
-
+        <!--通配符%来匹配所有表-->
         <table tableName="%">
-            <!--mysql 配置-->
+            <!--mysql 配置，generatedKey意味着所有的表都有一个id自增的主键-->
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
     </context>

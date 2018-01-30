@@ -41,17 +41,17 @@
   - [x] [swagger注解总结](#swagger注解总结)
   - [x] [快速上手](#快速上手-1)
   - [x] [项目源码](#项目源码-5)
-- [ ] [Spring Boot 集成 MyBatis](#spring-boot-集成-myBatis)
+- [x] [Spring Boot 集成 MyBatis](#spring-boot-集成-myBatis)
   - [x] [Mybatis原理简介](#mybatis原理简介)
   - [x] [官方组件包使用](#官方组件包使用)
     - [x] [XML版本](#xml版本)
     - [x] [注解版本](#注解版本)
     - [x] [项目源码](#项目源码-6)
-  - [ ] [第三方组件包使用](#第三方组件包使用)
-    - [ ] [集成 mybatis generator](#集成-mybatis-generator)
-    - [ ] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
-    - [ ] [集成通用 Mapper 插件](#集成通用-mapper-插件)
-    - [ ] [项目源码](#项目源码-7)
+  - [x] [第三方组件包使用](#第三方组件包使用)
+    - [x] [集成 mybatis generator](#集成-mybatis-generator)
+    - [x] [集成通用 Mapper 插件](#集成通用-mapper-插件)
+    - [x] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
+    - [x] [项目源码](#项目源码-7)
 - [ ] MyBatis Druid 多数据源
 - [ ] 集成 Redis 实现数据缓存和 Session 共享
 - [ ] 集成 dubbo+zookeeper
@@ -1084,10 +1084,250 @@ MyBatis的工作流程如下：
 
 ## 第三方组件包使用
 
+分页插件PageHelper和通用Mapper插件均出自大牛[@Liuzh](https://github.com/abel533)之手，在此感谢！！！
+
 ### 集成 mybatis generator
 
-### 集成分页插件 PageHelper
+mybatis generator 插件主要用于生成pojo、Mapper、Mapper.xml文件，简单的配置便可以在spring boot中集成 mybatis generator 插件。
+
+- 由于 mybatis generator 插件是集成在通用Mapper插件中，所以需要引入通用Mapper的依赖包，当然了还有数据库驱动、数据库连接池等依赖，这里就只贴出通用Mapper的依赖，可以查看完整的pom文件。
+  ```xml
+  <!--通用mapper-->
+  <dependency>
+      <groupId>tk.mybatis</groupId>
+      <artifactId>mapper-spring-boot-starter</artifactId>
+      <version>1.2.0</version>
+  </dependency>  
+  ```
+- 创建子自定义的Mapper接口，继承通用的Mapper。
+  ```java
+  /**
+   * 通用mapper
+   * @param <T>
+   */
+  public interface MyMapper<T> extends Mapper<T>, MySqlMapper<T> {
+      //TODO
+      //FIXME 特别注意，该接口不能被扫描到，否则会出错
+  }  
+  ```
+
+- 配置mybatis和通用mapper接口，在`application.properties`添加如下内容：
+  ```properties
+  # mybatis 配置
+  mybatis.type-aliases-package=com.leeyom.mybatis.model
+  mybatis.mapper-locations=classpath:mapper/*.xml
+
+  # 通用 Mapper 配置
+  mapper.mappers=com.leeyom.mybatis.util.MyMapper
+  mapper.not-empty=false
+  mapper.identity=MYSQL  
+  ```
+  根据不同的环境，配置数据源，我这里开发环境，编辑`application-dev.properties`：
+  ```properties
+  # database
+  spring.datasource.url=jdbc:mysql://localhost:3306/mybatis-test2
+  spring.datasource.username=root
+  spring.datasource.password=root
+  spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+
+  # 德鲁伊连接池配置
+  spring.datasource.druid.initial-size=1
+  spring.datasource.druid.min-idle=1
+  spring.datasource.druid.max-active=20
+  spring.datasource.druid.test-on-borrow=true
+  spring.datasource.druid.stat-view-servlet.allow=true  
+  ```  
+- 创建`generatorConfig.xml`，映射数据库实体，指定pojo、mapper、mapper.xml生成的路径：
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE generatorConfiguration
+          PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+          "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+  <generatorConfiguration>
+      <properties resource="application.properties"/>
+
+      <context id="Mysql" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+          <property name="beginningDelimiter" value="`"/>
+          <property name="endingDelimiter" value="`"/>
+
+          <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+              <property name="mappers" value="com.leeyom.mybatis.util.MyMapper"/>
+          </plugin>
+
+          <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                          connectionURL="jdbc:mysql://localhost:3306/mybatis-test2"
+                          userId="root"
+                          password="root">
+          </jdbcConnection>
+
+          <javaModelGenerator targetPackage="com.leeyom.mybatis.model" targetProject="src/main/java"/>
+
+          <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources"/>
+
+          <javaClientGenerator targetPackage="com.leeyom.mybatis.mapper" targetProject="src/main/java"
+                               type="XMLMAPPER"/>
+          <!--通配符%来匹配所有表-->
+          <table tableName="%">
+              <!--mysql 配置，generatedKey意味着所有的表都有一个id自增的主键-->
+              <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
+          </table>
+      </context>
+  </generatorConfiguration>  
+  ```
+- pom文件中加入mybatis generator 插件：
+  ```xml
+  <!--mybatis-generator插件-->
+  <plugin>
+      <groupId>org.mybatis.generator</groupId>
+      <artifactId>mybatis-generator-maven-plugin</artifactId>
+      <version>1.3.2</version>
+      <configuration>
+          <configurationFile>${basedir}/src/main/resources/generator/generatorConfig.xml
+          </configurationFile>
+          <overwrite>true</overwrite>
+          <verbose>true</verbose>
+      </configuration>
+      <dependencies>
+          <dependency>
+              <groupId>mysql</groupId>
+              <artifactId>mysql-connector-java</artifactId>
+              <version>${mysql.version}</version>
+          </dependency>
+          <dependency>
+              <groupId>tk.mybatis</groupId>
+              <artifactId>mapper</artifactId>
+              <version>3.4.0</version>
+          </dependency>
+      </dependencies>
+  </plugin>  
+  ```
+
+- 使用IDEA的maven插件运行 mybatis generator 插件：
+  ![mark](http://image.leeyom.top/blog/180130/h4kheA6CJC.png)
+- eclipse开发工具的话，使用命令：`mvn mybatis-generator:generate`执行项目。
+
+- 更加具体的使用可以参考通用mapper插件文档：[https://mapperhelper.github.io/docs/3.usembg/](https://mapperhelper.github.io/docs/3.usembg/)
 
 ### 集成通用 Mapper 插件
 
+通用Mapper都可以极大的方便开发人员。可以随意的按照自己的需要选择通用方法，还可以很方便的开发自己的通用方法。极其方便的使用MyBatis单表的增删改查。集成了 mybatis generator 插件基本上其实就已经集成通用Mapper了，但是还有个地方需要注意下，就是启动类中配置mapper扫描器的时候，注解`@MapperScan`是属于包`tk.mybatis.spring.annotation.MapperScan`，需要注意下。有了通用的Mapper，常用的增删改查基本上都可以省略，直接继承通用的Mapper接口，例如：
+```java
+public interface CityMapper extends MyMapper<City> {
+}
+```
+
+同时也可以简化Mapper.xml文件，后续只要在mapper.xml文件中再继续扩展我们要的数据接口就行，常用的增删改查就可以全部省略了：
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.leeyom.mybatis.mapper.CityMapper" >
+  <resultMap id="BaseResultMap" type="com.leeyom.mybatis.model.City" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>
+```
+
+有了通用的Mapper自然就可以构建通用的service层，创建一个通用的service接口`IBaseService`，并实现该接口`BaseServiceImpl`：
+```java
+public abstract class BaseServiceImpl<T> implements IBaseService<T> {
+
+    @Autowired
+    protected Mapper<T> mapper;
+
+    public Mapper<T> getMapper() {
+        return mapper;
+    }
+
+    @Override
+    public int deleteByPrimaryKey(Integer id) {
+        return mapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int insert(T record) {
+        return mapper.insert(record);
+    }
+
+    @Override
+    public T selectByPrimaryKey(Integer id) {
+        return mapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public List<T> selectAll() {
+        return mapper.selectAll();
+    }
+
+    @Override
+    public int updateByPrimaryKey(T record) {
+        return mapper.updateByPrimaryKey(record);
+    }
+}
+```
+后期所有的service接口只要继承通用的service接口实现类`BaseServiceImpl`，就可以省略增删改查的这部分代码，使代码更加简洁，比方说：
+
+```java
+@Service("cityService")
+public class CityServiceImpl extends BaseServiceImpl<City> implements ICityService {
+    @Autowired
+    CityMapper cityMapper;
+}
+
+```
+这就是通用mapper的集成以及简易的使用过程，具体的可以参考通用mapper的官方文档：[https://mapperhelper.github.io/docs/](https://mapperhelper.github.io/docs/)。
+
+### 集成分页插件 PageHelper
+
+集成分页插件其实很简单，首先添加依赖：
+```xml
+<!--分页插件pagehelper-->
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper-spring-boot-starter</artifactId>
+    <version>1.2.1</version>
+</dependency>
+```
+
+然后在`application.properties`添加如下的配置：
+```properties
+# 分页插件配置
+pagehelper.helperDialect=mysql
+pagehelper.reasonable=true
+pagehelper.supportMethodsArguments=true
+pagehelper.params=count=countSql
+```
+即可完成集成。具体的使用过程可以如下，比如我要分页查找第一页的country列表，每一页5条，service层接口实现如下：
+```java
+/**
+ * 分页查找
+ * @param pageParam 分页参数封装
+ * @return
+ */
+@Override
+public DataGridResult getCountryListByPage(PageParam pageParam) {
+    Integer pageNumber = pageParam.getPageNumber();
+    Integer pageSize = pageParam.getPageSize();
+    PageHelper.startPage(pageNumber, pageSize);
+    List<Country> list = countryMapper.selectAll();
+    PageInfo<Country> pageInfo = new PageInfo<>(list);
+    DataGridResult dataGridResult = new DataGridResult();
+    dataGridResult.setRows(list);
+    dataGridResult.setTotal(pageInfo.getTotal());
+    return dataGridResult;
+}
+```
+最终的结果：
+![mark](http://image.leeyom.top/blog/180130/2997KdlfFI.png)
+
+对于分页插件PageHelper更多的资料可以查看其官网：[https://pagehelper.github.io/](https://pagehelper.github.io/)。
+
 ### 项目源码
+
+源码参考：[spring-boot-mybatis-pagehelper-mapper](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-pagehelper-mapper)
