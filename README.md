@@ -52,7 +52,9 @@
     - [x] [集成通用 Mapper 插件](#集成通用-mapper-插件)
     - [x] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
     - [x] [项目源码](#项目源码-7)
-- [ ] MyBatis Druid 多数据源
+- [ ] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
+  - [x] [单数据源](#单数据源)
+  - [ ] [多数据源](#多数据源)
 - [ ] 集成 Redis 实现数据缓存和 Session 共享
 - [ ] 集成 dubbo+zookeeper
 - [ ] 集成 RabbitMQ
@@ -1332,3 +1334,54 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
 ### 项目源码
 
 源码参考：[spring-boot-mybatis-pagehelper-mapper](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-pagehelper-mapper)
+
+## 集成 MyBatis Druid 数据源
+
+`Druid`是阿里巴巴公司旗下的一个开源项目，可以说是目前世界上最好的数据库连接池，其 spring boot 版本的项目地址是：[https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter](https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter)。
+
+### 单数据源
+
+集成 druid 单数据源相对于比较简单，只需要简单的配置即可：
+
+- 添加 druid 依赖：
+  ```xml
+  <!--Druid-->
+   <dependency>
+       <groupId>com.alibaba</groupId>
+       <artifactId>druid-spring-boot-starter</artifactId>
+       <version>1.1.6</version>
+   </dependency>  
+  ```
+- 在`application.properties`中配置 druid 的相关的属性：
+  ```properties
+  # 配置数据源
+  spring.datasource.druid.driverClassName=com.mysql.jdbc.Driver
+  spring.datasource.druid.url=jdbc:mysql://localhost:3306/mybatis-test
+  ?useUnicode=true&characterEncoding=utf-8
+  spring.datasource.druid.username=root
+  spring.datasource.druid.password=root
+
+  # 初始化大小、最小、最大连接数
+  spring.datasource.druid.initial-size=3
+  spring.datasource.druid.min-idle=3
+  spring.datasource.druid.max-active=10
+
+  # 配置获取连接等待超时的时间
+  spring.datasource.druid.max-wait=60000
+
+  # 监控后台账号和密码
+  spring.datasource.druid.stat-view-servlet.login-username=admin
+  spring.datasource.druid.stat-view-servlet.login-password=admin
+
+  # 配置 StatFilter
+  spring.datasource.druid.filter.stat.log-slow-sql=true
+  spring.datasource.druid.filter.stat.slow-sql-millis=2000  
+  ```
+  更多配置项可以访问  [druid 官方项目地址](https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter)。
+
+- 首先我们先发起一个请求:[http://localhost:8080/getUsers/](http://localhost:8080/getUsers/)，触发查询所有的用户列表。druid 有个好处就是可以在其提供的监控台，监控所有的sql的执行情况，比如执行次数、执行时间、读取行数等等，访问地址：[http://localhost:8080/druid](http://localhost:8080/druid)，输入`application.properties`配置好的监控后台账号和密码，就能进入首页，并查看sql监控，如下所示：
+![druid-index.png](http://www.wailian.work/images/2018/02/02/druid-index.png)
+[![sql-stat.png](http://www.wailian.work/images/2018/02/02/sql-stat.png)](http://www.wailian.work/image/MOI72I)
+- 以上便是 Druid 单数据源配置，很简单，项目地址为：[spring-boot-mybatis-druid-single](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-druid-single)。
+
+### 多数据源
