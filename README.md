@@ -52,9 +52,9 @@
     - [x] [集成通用 Mapper 插件](#集成通用-mapper-插件)
     - [x] [集成分页插件 PageHelper](#集成分页插件-pagehelper)
     - [x] [项目源码](#项目源码-7)
-- [ ] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
+- [x] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
   - [x] [单数据源](#单数据源)
-  - [ ] [多数据源](#多数据源)
+  - [x] [多数据源](#多数据源)
 - [ ] 集成 Redis 实现数据缓存和 Session 共享
 - [ ] 集成 dubbo+zookeeper
 - [ ] 集成 RabbitMQ
@@ -1385,3 +1385,67 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
 - 以上便是 Druid 单数据源配置，很简单，项目地址为：[spring-boot-mybatis-druid-single](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-druid-single)。
 
 ### 多数据源
+
+在不同的业务场景中，一个项目中可能涉及到多个数据源（虽然不推荐），`Druid`也做了相应的支持。
+
+- 修改`application.properties`文件，配置多个数据源，分别是`test1`和`test2`：
+  ```properties
+  # 数据源1
+  spring.datasource.druid.one.driverClassName = com.mysql.jdbc.Driver
+  spring.datasource.druid.one.url = jdbc:mysql://localhost:3306/test1
+  ?useUnicode=true&characterEncoding=utf-8
+  spring.datasource.druid.one.username = root
+  spring.datasource.druid.one.password = root
+
+  # 数据源2
+  spring.datasource.druid.two.driverClassName = com.mysql.jdbc.Driver
+  spring.datasource.druid.two.url = jdbc:mysql://localhost:3306/test2
+  ?useUnicode=true&characterEncoding=utf-8
+  spring.datasource.druid.two.username = root
+  spring.datasource.druid.two.password = root  
+
+  # 其他的类似
+  ```
+  有个比较有意思的地方就是`Druid`支持属性的继承，在多数据源的情况下设置了`spring.datasource.druid`的相关属性会被`spring.datasource.druid.*`给继承，如果`spring.datasource.druid.*`也配置了相同的属性会被覆盖。示例如下：
+  ```properties
+  spring.datasource.druid.initial-size=3
+  spring.datasource.druid.min-idle=3
+  spring.datasource.druid.max-active=10
+
+  # Druid 数据源 1 配置，继承 spring.datasource.druid.* 配置，相同则覆盖
+  spring.datasource.druid.one.max-active=20
+  spring.datasource.druid.one.max-wait=10000
+
+  # Druid 数据源 2 配置，继承spring.datasource.druid.* 配置，相同则覆盖
+  spring.datasource.druid.two.max-active=30
+  spring.datasource.druid.two.max-wait=20000      
+  ```
+
+- 接下来就是注入多数据源，核心的配置文件是：`MultiDataSourceConfig.java`，`OneDataSourceConfig.java`，`TwoDataSourceConfig.java`，这三个类的作用分别如下：
+  - `MultiDataSourceConfig.java`：加载数据源。
+    - 使用注解：`@Primary`，指定一个默认的主数据源。
+  - `OneDataSourceConfig.java`：将创建好的数据源，注入到`SqlSessionFactory`中，再创建事务，将`SqlSessionFactory`注入到创建的`SqlSessionTemplate`中，最后将`SqlSessionTemplate`注入到对应的 `Mapper` 包路径下。
+    - 这里需要注意一点的是：**多数据源的情况下，不需要在启动类添加：`@MapperScan("com.xxx.mapper")`的注解**。
+  - `TwoDataSourceConfig.java`：同上。
+
+- 在`UserController`里注入两个不同数据源的mapper，然后获取这两个不同数据源下面的所有的用户列表，前台发起一个请求:`http://localhost:8080/getUsers/`，看能不能拿到这两个数据源的数据。
+  ```java
+  @Autowired
+     private UserOneMapper userOneMapper;
+     @Autowired
+     private UserTwoMapper userTwoMapper;
+
+     @RequestMapping("/getUsers")
+     public List<Object> getUsers() {
+         List<User> oneUserList = userOneMapper.selectAll();
+         List<User> twoUserList = userTwoMapper.selectAll();
+         List<Object> users = new ArrayList<>();
+         users.add(oneUserList);
+         users.add(twoUserList);
+         return users;
+     }  
+  ```
+- 访问`Druid`控制台：[http://localhost:8080/druid](http://localhost:8080/druid)，若出现两个数据源的信息，说明多数据源是配置成功的。
+  - ![DataSource1.png](http://www.wailian.work/images/2018/02/03/DataSource1.png)
+  - ![dDataSource2.png](http://www.wailian.work/images/2018/02/03/dDataSource2.png)
+- 更多的细节可以查看源码：[spring-boot-mybatis-druid-multi](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-druid-multi)。
