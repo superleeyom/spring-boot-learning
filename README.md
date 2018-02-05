@@ -56,7 +56,7 @@
   - [x] [单数据源](#单数据源)
   - [x] [多数据源](#多数据源)
 - [ ] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
-  - [ ] [Redis的简单上手](#redis的简单上手)
+  - [x] [集成Redis并简单上手](#集成redis并简单上手)
   - [ ] [实现数据缓存](#实现数据缓存)
   - [ ] [实现Session共享](#实现session共享)
 - [ ] 集成 dubbo+zookeeper
@@ -1455,8 +1455,107 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
 
 # 集成 Redis 实现数据缓存和 Session 共享
 
-## Redis的简单上手
+redis是一个key-value存储系统。和Memcached类似，它支持存储的value类型相对更多，包括string(字符串)、list(链表)、set(集合)、zset(sorted set --有序集合)和hash（哈希类型）。这些数据类型都支持push/pop、add/remove及取交集并集和差集及更丰富的操作，而且这些操作都是原子性的。在此基础上，redis支持各种不同方式的排序。与memcached一样，为了保证效率，数据都是缓存在内存中。区别的是redis会周期性的把更新的数据写入磁盘或者把修改操作写入追加的记录文件，并且在此基础上实现了master-slave(主从)同步。
 
+## 集成Redis并简单上手
+
+- 安装redis，可以参考我的[文章](http://www.leeyom.top/2017/11/12/linux-note/)，这里就不详述。
+- 引入核心依赖包：`spring-boot-starter-data-redis`，里面封装了一系列操作redis的API。
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+  </dependency>  
+  ```
+- 配置redis的连接信息、端口、密码、最大连接数、最小连接数等等，编辑`application.properties`：
+  ```properties
+  # Redis 数据库索引（默认为0）
+  spring.redis.database=0
+  # Redis 服务器地址
+  spring.redis.host=192.168.1.225
+  # Redis 服务器连接端口
+  spring.redis.port=6379
+  # Redis 服务器连接密码（默认为空）
+  spring.redis.password=root
+  # 连接池最大连接数（使用负值表示没有限制）
+  spring.redis.pool.max-active=100
+  # 连接池最大阻塞等待时间（使用负值表示没有限制）
+  spring.redis.pool.max-wait=-1
+  # 连接池中的最大空闲连接
+  spring.redis.pool.max-idle=10
+  # 连接池中的最小空闲连接
+  spring.redis.pool.min-idle=5
+  # 连接超时时间（毫秒）
+  spring.redis.timeout=10000  
+  ```
+
+- 创建redis配置类`RedisConfig`，主要是配置主键生成策略和缓存的过期时间，如果不配置的话，均采用默认的配置。
+  - `@EnableCaching`：开启缓存。
+  - 主键生成策略：默认的是以参数名为主键。
+  - 默认的过期时间：如果没有设置expire，默认的时效是永不过期，但是网上说：[如果实际内存超过你设置的最大内存，就会使用LRU删除机制](https://segmentfault.com/q/1010000004490914)。
+  ```java
+  @Configuration
+  @EnableCaching
+  public class RedisConfig extends CachingConfigurerSupport {
+
+      /**
+       * 配置主键生成策略，默认的是参数名做为主键
+       * @return
+       */
+      @Bean
+      public KeyGenerator keyGenerator() {
+          return new KeyGenerator() {
+              @Override
+              public Object generate(Object target, Method method, Object... params) {
+                  StringBuilder sb = new StringBuilder();
+                  sb.append(target.getClass().getName());
+                  sb.append(method.getName());
+                  for (Object obj : params) {
+                      sb.append(obj.toString());
+                  }
+                  return sb.toString();
+              }
+          };
+      }
+
+      /**
+       * 设置默认的缓存时效
+       * @param redisTemplate
+       * @return
+       */
+      @Bean
+      public CacheManager cacheManager(RedisTemplate redisTemplate) {
+          RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
+          //设置缓存过期时间，单位为秒
+          //rcm.setDefaultExpiration(60);
+          return rcm;
+      }
+  }  
+  ```
+- 以上便是集成redis的过程，下面来简单的梳理下redis中对常用的数据类型的简单操作需要注意的点：
+  - **简单的数据类型**
+    - 多次进行 set 相同的 key，键对应的值会被覆盖。
+  - **对象**
+    - 若缓存对象是对象，需要注意的一点就是：对象要序列化。
+  - **hash（哈希）**
+    - ``` java
+      HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+      //第一个参数为key，第二个参数为属性，第三个参数为属性值
+      hashOperations.put("leeyom", "sex", "man");
+      ```
+  - **List**
+    - Redis list 的实现为一个双向链表，即可以支持反向查找和遍历，更方便操作，不过带来了部分额外的内存开销，Redis 内部的很多实现，包括发送缓冲队列等也都是用的这个数据结构。
+  - **set**
+    - set集合有自动去重的功能，无法自动排序。
+    - `difference`：difference(ket1,key2) 函数会把 key1 中不同于 key2 的数据对比出来。
+    - `unions`：unions(ket1,key2) 会取两个集合的合集。
+  - **zset**
+    -  zset 和 set 类似，区别是 set 不是自动有序的，而 zset 可以通过用户额外提供一个优先级（score）的参数来为成员排序，并且是插入有序，即自动排序。
+    - ```java
+      //第一个参数key、第二个参数为值，第三个参数权重值，就是根据这个权重值进行排序
+      zset.add("zset", "http", 1);
+      ```
+- 项目地址为：[spring-boot-redis-simple](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-simple)。
 ## 实现数据缓存
 
 ## 实现Session共享
