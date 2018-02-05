@@ -55,7 +55,10 @@
 - [x] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
   - [x] [单数据源](#单数据源)
   - [x] [多数据源](#多数据源)
-- [ ] 集成 Redis 实现数据缓存和 Session 共享
+- [ ] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
+  - [ ] [Redis的简单上手](#redis的简单上手)
+  - [ ] [实现数据缓存](#实现数据缓存)
+  - [ ] [实现Session共享](#实现session共享)
 - [ ] 集成 dubbo+zookeeper
 - [ ] 集成 RabbitMQ
 - [ ] 集成 MongoDB
@@ -1449,3 +1452,11 @@ public DataGridResult getCountryListByPage(PageParam pageParam) {
   - ![DataSource1.png](http://www.wailian.work/images/2018/02/03/DataSource1.png)
   - ![dDataSource2.png](http://www.wailian.work/images/2018/02/03/dDataSource2.png)
 - 更多的细节可以查看源码：[spring-boot-mybatis-druid-multi](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mybatis-druid-multi)。
+
+# 集成 Redis 实现数据缓存和 Session 共享
+
+## Redis的简单上手
+
+## 实现数据缓存
+
+## 实现Session共享
