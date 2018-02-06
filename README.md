@@ -57,7 +57,7 @@
   - [x] [多数据源](#多数据源)
 - [ ] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
   - [x] [集成Redis并简单上手](#集成redis并简单上手)
-  - [ ] [实现数据缓存](#实现数据缓存)
+  - [x] [实现数据缓存](#实现数据缓存)
   - [ ] [实现Session共享](#实现session共享)
 - [ ] 集成 dubbo+zookeeper
 - [ ] 集成 RabbitMQ
@@ -1558,4 +1558,79 @@ redis是一个key-value存储系统。和Memcached类似，它支持存储的val
 - 项目地址为：[spring-boot-redis-simple](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-simple)。
 ## 实现数据缓存
 
+- 引入核心依赖包`spring-boot-starter-cache`。
+  ```xml
+  <!--缓存-->
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+  </dependency>  
+  ```
+- 配置redis，前面已经配置过，这里就不详述。
+- 数据缓存涉及到三个重要的注解：`@Cacheable`、`@CachePut`、`@CacheEvict`,就是使用这三个注解，配合redis便可以实现数据缓存。
+  - `@Cacheable`：
+    - 属性：
+      - `value`：缓存的名称。
+      - `key`：缓存的 key，可以为空，如果指定要按照 Spel 表达式编写，如果不指定，则缺省按照方法的所有参数进行组合。
+      - `condition`：触发条件，只有满足条件的情况才会加入缓存，默认为空，既表示全部都加入缓存，支持 Spel表达式。
+    - 示例：
+      ```java
+      /**
+        * 如果参数的长度小于4，才走缓存
+        * @param userName
+        * @return
+        */
+       @RequestMapping("/hello2")
+       @Cacheable(value = "helloCache2", key = "#userName", condition = "#userName.length() <= 4")
+       public String hello2(String userName) {
+           System.out.println("方法被调用了！！");
+           return "hello2 " + userName;
+       }      
+      ```
+    - 总结：
+      - 当标记在一个方法上时表示该方法是支持缓存的，当标记在一个类上时则表示该类所有的方法都是支持缓存的。
+      - 当执行到一个被 `@Cacheable` 注解的方法时，Spring 首先检查 condition 条件是否满足，如果不满足，执行方法，返回；如果满足，在缓存空间中查找使用 key 存储的对象，如果找到，将找到的结果返回，如果没有找到执行方法，将方法的返回值以 key-value 对象的方式存入缓存中，然后方法返回。
+  - `@CachePut`：
+    - 属性：同`@Cacheable`的属性一样，也拥有`value`、`key`、`condition`三个属性。
+    - 示例：
+      ```java
+      /**
+       * CachePut：在满足条件的前提下，每次调用改方法，
+       * 都会更新更新指定的缓存
+       * @param nickName
+       * @return
+       */
+      @RequestMapping("/findByNickName")
+      @CachePut(value = "usersCache", key = "#nickName")
+      public List<Users> findByNickName(String nickName) {
+          System.out.println("执行了数据库操作");
+          return userRepository.findByNickName(nickName);
+      }      
+      ```
+    - 总结：
+      - 与 `@Cacheable` 不同的是使用 `@CachePut` 标注的方法在执行前，不会去检查缓存中是否存在之前执行过的结果，而是每次都会执行该方法，并将执行结果以键值对的形式存入指定的缓存中。
+  - `@CacheEvict`：
+    - 属性：
+      - 同`@Cacheable`的属性一样，也拥有`value`、`key`、`condition`三个属性。
+      - `allEntries`：allEntries 是 boolean 类型，表示是否需要清除缓存中的所有元素。默认为 false，表示不需要。
+      - `beforeInvocation`：boolean类型，默认为false，当我们指定该属性值为 true 时，Spring 会在调用该方法之前清除缓存中的指定元素。
+    - 示例：
+      ```java
+      /**
+       * allEntries = true 表示清除所有的缓存
+       * beforeInvocation = true 表示调用该方法之前清除缓存中的指定元素。
+       * @param nickname
+       * @return
+       */
+      @RequestMapping("/allEntries")
+      @CacheEvict(value = "usersCache", allEntries = true, beforeInvocation = true)
+      public List<Users> allEntries(String nickname) {
+          List<Users> users = userRepository.findByNickName(nickname);
+          System.out.println("执行了数据库操作");
+          return users;
+      }      
+      ```
+    - 总结：
+      - `@CacheEvict`是用来标注在需要清除缓存元素的方法或类上的。当标记在一个类上时表示其中所有的方法的执行都会触发缓存的清除操作。
+- 项目源码：[spring-boot-redis-cache](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-cache)。
 ## 实现Session共享
