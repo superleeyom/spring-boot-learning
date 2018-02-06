@@ -1663,15 +1663,15 @@ spring boot 中可以使用组件`spring-session-data-redis`来实现session共�
 - 再访问服务器A：`http://localhost:8080/getSession`，获取缓存的session信息。
   ```json
   {
-    sessionId: "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
-    message: "http://localhost:8080/setSession"
+    "sessionId": "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
+    "message": "http://localhost:8080/setSession"
   }  
   ```
 - 访问服务器B：`http://localhost:9090/getSession`，看返回的session信息是否是缓存在redis中的session信息，若两台服务器之间返回的session信息一致，说明session共享是成功的。
   ```json
   {
-    sessionId: "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
-    message: "http://localhost:8080/setSession"
+    "sessionId": "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
+    "message": "http://localhost:8080/setSession"
   }  
   ```
 通过以上的简单验证，证明是可以通过redis进行session共享的，具体的项目代码可以参考：[spring-boot-redis-session](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-session)。
