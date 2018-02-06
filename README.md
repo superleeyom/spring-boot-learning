@@ -55,10 +55,10 @@
 - [x] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
   - [x] [单数据源](#单数据源)
   - [x] [多数据源](#多数据源)
-- [ ] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
+- [x] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
   - [x] [集成Redis并简单上手](#集成redis并简单上手)
   - [x] [实现数据缓存](#实现数据缓存)
-  - [ ] [实现Session共享](#实现session共享)
+  - [x] [实现Session共享](#实现session共享)
 - [ ] 集成 dubbo+zookeeper
 - [ ] 集成 RabbitMQ
 - [ ] 集成 MongoDB
@@ -1634,3 +1634,44 @@ redis是一个key-value存储系统。和Memcached类似，它支持存储的val
       - `@CacheEvict`是用来标注在需要清除缓存元素的方法或类上的。当标记在一个类上时表示其中所有的方法的执行都会触发缓存的清除操作。
 - 项目源码：[spring-boot-redis-cache](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-cache)。
 ## 实现Session共享
+
+很多的时候由于用户请求的增大，我们需要做请求分发，负载均衡。用户的请求通过Nginx，由于权重的不同，就会出现第一次的请求会交给服务器 A 处理，下次的请求可能会是服务B处理，如果不做 Session 共享的话，就有可能出现用户在服务 A 登录了，下次请求的时候到达服务 B 又要求用户重新登录。假如我们将Session缓存到redis中，那么A服务器和B服务器都可以共享Session。
+
+spring boot 中可以使用组件`spring-session-data-redis`来实现session共享，下面来集成spring session，集成的话很简单，只需要简单的2步就可以：
+- 引入`spring-session-data-redis`依赖：
+  ```xml
+  <!--session-->
+  <dependency>
+      <groupId>org.springframework.session</groupId>
+      <artifactId>spring-session-data-redis</artifactId>
+  </dependency>  
+  ```
+- 创建session配置类`SessionConfig`，指定session失效时间：
+  ```java
+  @Configuration
+  @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 86400 * 30)
+  public class SessionConfig {
+
+
+  }  
+  ```
+
+那接下来，简单的验证下两台服务器之间是否真的可以进行session共享，创建了两个项目`spring-boot-redis-session-one`和`spring-boot-redis-session-two`，其对应的端口分别为8080和9090，这两个项目代表服务器A和服务器B。
+
+- 分别启动两个项目。
+- 首先访问服务器A：`http://localhost:8080/setSession`，将session缓存到redis。
+- 再访问服务器A：`http://localhost:8080/getSession`，获取缓存的session信息。
+  ```json
+  {
+    sessionId: "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
+    message: "http://localhost:8080/setSession"
+  }  
+  ```
+- 访问服务器B：`http://localhost:9090/getSession`，看返回的session信息是否是缓存在redis中的session信息，若两台服务器之间返回的session信息一致，说明session共享是成功的。
+  ```json
+  {
+    sessionId: "e6d9eaf2-03a3-40e2-9428-e8b233a530a8",
+    message: "http://localhost:8080/setSession"
+  }  
+  ```
+通过以上的简单验证，证明是可以通过redis进行session共享的，具体的项目代码可以参考：[spring-boot-redis-session](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-session)。
