@@ -59,7 +59,7 @@
   - [x] [集成Redis并简单上手](#集成redis并简单上手)
   - [x] [实现数据缓存](#实现数据缓存)
   - [x] [实现Session共享](#实现session共享)
-- [ ] 集成 dubbo+zookeeper
+- [x] [集成dubbo和zookeeper](#集成dubbo和zookeeper)
 - [ ] 集成 RabbitMQ
 - [ ] 集成 MongoDB
 - [ ] Spring Boot 发送邮件
@@ -1675,3 +1675,83 @@ spring boot 中可以使用组件`spring-session-data-redis`来实现session共�
   }  
   ```
 通过以上的简单验证，证明是可以通过redis进行session共享的，具体的项目代码可以参考：[spring-boot-redis-session](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-redis-session)。
+
+# 集成dubbo和zookeeper
+
+DUBBO是一个分布式服务框架，致力于提供高性能和透明化的RPC远程服务调用方案，是阿里巴巴SOA服务化治理方案的核心框架。而ZooKeeper是一个分布式的，开放源码的分布式应用程序协调服务，ZooKeeper的目标就是封装好复杂易出错的关键服务，将简单易用的接口和性能高效、功能稳定的系统提供给用户。两者之间需要配合使用。
+
+下面简单讲解下spring boot中集成dubbo和zookeeper实现分布式项目，整个示例由以下模块组成：
+- `spring-boot-dubbo-api`：此项目被所有模块依赖，一些公用的类库或者要暴露的接口放在此处，为了防止循环依赖，此模块不需要继承父级项目。
+- `spring-boot-dubbo-consumer`：消费者，应用端口为9090。
+- `spring-boot-dubbo-provider`：提供者，应用端口为8080。
+- `spring-boot-dubbo`：父级项目，管理公有的依赖。
+
+下面来梳理下整个的整合过程：
+- 首先肯定是安装`zookeeper`，可以参考我的[文章](http://www.leeyom.top/2017/11/08/zookeeper-install/)，此处不做详述了。
+- 在父级项目`spring-boot-dubbo`的pom文件中引入dubbo相关的依赖，利用maven的聚合继承，这样消费者和提供者的pom文件就不需要再引入相同的依赖：
+  ```xml
+  <!-- dubbo -->
+  <dependency>
+      <groupId>io.dubbo.springboot</groupId>
+      <artifactId>spring-boot-starter-dubbo</artifactId>
+      <version>1.0.0</version>
+  </dependency>  
+  ```
+- 配置提供者`spring-boot-dubbo-provider`的`application.properties`，设置服务暴露的端口号、注册中心、扫描dubbo注解包等等相关配置：
+  ```properties
+  # dubbo
+  spring.dubbo.application.name=example-provider
+  spring.dubbo.registry.address=zookeeper://192.168.1.230:2181
+  spring.dubbo.protocol.name=dubbo
+  spring.dubbo.protocol.port=20880
+  spring.dubbo.scan=com.leeyom.dubbo  
+  ```
+- 配置消费者`spring-boot-dubbo-consumer`的`application.properties`：
+  ```properties
+  # dubbo
+  spring.dubbo.application.name=example-consume
+  spring.dubbo.registry.address=zookeeper://192.168.1.230:2181
+  spring.dubbo.scan=com.leeyom.dubbo  
+  ```
+- 在`spring-boot-dubbo-api`模块中，发布一个接口`UserService`类：
+  ```java
+  public interface UserService {
+      /**
+       * 获取指定的用户信息
+       * @param userId 用户id
+       * @return
+       */
+      UserEntity getUserById(Integer userId);
+
+  }  
+  ```
+- 然后在提供者模块`spring-boot-dubbo-provider`，实现（暴露）该接口，实现这接口需要使用注解`@Service`，需要注意的是，这个是dubbo包下面的注解，不是spring包下面的注解，不要搞混了。
+  ```java
+  @Service(timeout = 1200000, version = "1.0.0")
+  public class UserServiceImpl implements UserService {
+      @Override
+      public UserEntity getUserById(Integer userId) {
+          //模拟测试
+          return new UserEntity(userId, "Leeyom", "123");
+      }
+  }  
+  ```
+- 消费者`spring-boot-dubbo-consumer`模块想调用提供者发布的`getUserById`这个接口，只需要使用注解`@Reference`，引用提供者服务，注解`@Reference`需要带上版本号（version）属性，否则会报空指针异常。
+  ```java
+  @Reference(version = "1.0.0")
+      private UserService userService;
+
+      @RequestMapping(value = "/testDubbo")
+      public UserEntity testDubbo(Integer userId) {
+          return userService.getUserById(userId);
+      }  
+  ```
+- 测试验证，访问消费者的http接口：`http://localhost:9090/testDubbo?userId=1`，该接口的内部调用了服务者暴露的接口，如果返回了如下数据，说明dubbo是整合成功的，否则整合失败。
+  ```json
+  {
+    "id": 1,
+    "userName": "Leeyom",
+    "password": "123"
+  }  
+  ```
+- 以上这个版本我称它为：无xml版本，另外还搞了个xml版本的，这里就不详述了，具体可以查看项目源码：[spring-boot-dubbo](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-dubbo)。
