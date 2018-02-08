@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.leeyom.dubbo.api.UserService;
 import com.leeyom.dubbo.pojo.UserEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -20,5 +21,10 @@ public class ConsumerController {
     @RequestMapping(value = "/testDubbo")
     public UserEntity testDubbo(Integer userId) {
         return userService.getUserById(userId);
+    }
+
+    @RequestMapping(value = "/testGet", method = RequestMethod.GET)
+    public UserEntity testDubbo(UserEntity user) {
+        return user;
     }
 }
