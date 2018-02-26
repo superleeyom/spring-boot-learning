@@ -61,12 +61,89 @@
   - [x] [实现数据缓存](#实现数据缓存)
   - [x] [实现Session共享](#实现session共享)
 - [x] [集成dubbo和zookeeper](#集成dubbo和zookeeper)
-- [ ] 集成 RabbitMQ
+- [ ] [集成 RabbitMQ](#集成-rabbitmq)
+  - [x] [简单使用](#简单使用)
 - [ ] 集成 MongoDB
 - [ ] Spring Boot 发送邮件
 - [ ] 集成 quartz
 - [ ] Spring Boot 集成测试和部署运维
 - [ ] 综合实战用户管理系统
+
+# 集成 RabbitMQ
+
+## 简单使用
+
+- `RabbitMQ`的安装参考我的文章：[《安装RabbitMQ》](http://www.leeyom.top/2017/11/12/linux-note/)。
+- 引入`RabbitMQ`组件包：`spring-boot-starter-amqp`。
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+  </dependency>  
+  ```
+- 在`application.properties`配置`RabbitMQ`的ip、端口、账号、密码等信息。
+  ```properties
+  # rabbitmq
+  spring.rabbitmq.host=10.211.55.5
+  spring.rabbitmq.port=5672
+  spring.rabbitmq.username=guest
+  spring.rabbitmq.password=guest  
+  ```
+- 创建一个队列，队列的名字叫：`hello`。
+  ```java
+  @Bean
+  public Queue Queue() {
+      return new Queue("hello");
+  }  
+  ```
+- 创建一个发送者，用于发送消息，由`AmqpTemplate`提供实现。
+  ```java
+  @Component
+  public class HelloSender {
+
+      @Autowired
+      private AmqpTemplate rabbitmqTemplate;
+
+      public void send() {
+          String context = "hello " + new Date();
+          System.out.println("Sender: " + context);
+
+          //将消息发送给routingKey为"hello"的队列
+          rabbitmqTemplate.convertAndSend("hello", context);
+      }
+
+  }
+  ```
+- 创建一个接收者，涉及到两个注解：`@RabbitListener`和`@RabbitHandler`。
+  - `@RabbitListener`：指定该消息来自哪个队列。
+  - `@RabbitHandler`：指定具体接收的方法。
+  - 代码如下：
+    ```java
+    @Component
+    @RabbitListener(queues = "hello")
+    public class HelloReceiver {
+
+        @RabbitHandler
+        public void process(String hello) {
+            System.out.println("Receive: " + hello);
+        }
+
+    }    
+    ```
+- 测试，接收者和发送者的都应该是同一队列`hello`，否则将接收到不到消息：
+  ```java
+  @Test
+  public void oneToOne() throws InterruptedException {
+      helloSender.send();
+      Thread.sleep(2000l);
+  }  
+  ```
+  打印：
+  ```
+  Sender: hello Mon Feb 26 23:08:25 CST 2018
+  AdvanceReceive1: hello Mon Feb 26 23:08:25 CST 2018  
+  ```
+  说明测试成功，一对多和多对多无非就是创建多个发送者和多个接收者，基本上差不多。
 
 # 开发环境
 
