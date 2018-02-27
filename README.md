@@ -63,6 +63,7 @@
 - [x] [集成dubbo和zookeeper](#集成dubbo和zookeeper)
 - [ ] [集成 RabbitMQ](#集成-rabbitmq)
   - [x] [简单使用](#简单使用)
+  - [ ] [进阶使用](#进阶使用)
 - [ ] 集成 MongoDB
 - [ ] Spring Boot 发送邮件
 - [ ] 集成 quartz
