@@ -1,7 +1,9 @@
 package com.leeyom.rabbitmq;
 
+import com.leeyom.rabbitmq.pojo.User;
 import com.leeyom.rabbitmq.sender.AdvanceSender;
 import com.leeyom.rabbitmq.sender.AdvanceSender2;
+import com.leeyom.rabbitmq.sender.AdvanceSender3;
 import com.leeyom.rabbitmq.sender.HelloSender;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +21,8 @@ public class RabbitmqTest {
     private AdvanceSender advanceSender;
     @Autowired
     private AdvanceSender2 advanceSender2;
+    @Autowired
+    private AdvanceSender3 advanceSender3;
 
     /**
      * 一对一发送
@@ -52,6 +56,16 @@ public class RabbitmqTest {
             advanceSender.send(i);
             advanceSender2.send(i);
         }
+        Thread.sleep(10000l);
+    }
+
+    /**
+     * 发送对象
+     */
+    @Test
+    public void testSendObject() throws InterruptedException {
+        User user = new User("Leeyom", 24);
+        advanceSender3.send(user);
         Thread.sleep(10000l);
     }
 
