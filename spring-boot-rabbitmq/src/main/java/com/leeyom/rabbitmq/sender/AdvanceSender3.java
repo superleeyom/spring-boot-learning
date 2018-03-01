@@ -12,10 +12,8 @@ public class AdvanceSender3 {
     private AmqpTemplate rabbitmqTemplate;
 
     public void send(User user) {
-
         System.out.println("AdvanceSender3: " + user.toString());
-
-        //将消息发送给routingKey为"hello"的队列
+        //将消息发送给routingKey为"object"的队列
         rabbitmqTemplate.convertAndSend("object", user);
     }
 

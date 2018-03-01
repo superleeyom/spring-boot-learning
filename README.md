@@ -61,9 +61,9 @@
   - [x] [实现数据缓存](#实现数据缓存)
   - [x] [实现Session共享](#实现session共享)
 - [x] [集成dubbo和zookeeper](#集成dubbo和zookeeper)
-- [ ] [集成 RabbitMQ](#集成-rabbitmq)
+- [x] [集成 RabbitMQ](#集成-rabbitmq)
   - [x] [简单使用](#简单使用)
-  - [ ] [进阶使用](#进阶使用)
+  - [x] [进阶使用](#进阶使用)
 - [ ] 集成 MongoDB
 - [ ] Spring Boot 发送邮件
 - [ ] 集成 quartz
@@ -145,6 +145,61 @@
   AdvanceReceive1: hello Mon Feb 26 23:08:25 CST 2018  
   ```
   说明测试成功，一对多和多对多无非就是创建多个发送者和多个接收者，基本上差不多。
+
+## 进阶使用
+
+- 支持对象的发送与接收：
+  - 创建一个名为`object`的队列：
+    ```java
+    @Bean
+    public Queue objectQueue() {
+        return new Queue("object");
+    }    
+    ```
+  - 创建发送者，发送一个对象：
+    ```java
+    public void send(User user) {
+        System.out.println("AdvanceSender3: " + user.toString());
+        //将消息发送给routingKey为"object"的队列
+        rabbitmqTemplate.convertAndSend("object", user);
+    }    
+    ```
+  - 接收者接收对象：
+    ```java
+    @RabbitHandler
+    public void process(User user) {
+        System.out.println("AdvanceReceive3: " + user.toString());
+    }    
+    ```
+  - 测试：
+    ```java
+    @Test
+    public void testSendObject() throws InterruptedException {
+        User user = new User("Leeyom", 24);
+        advanceSender3.send(user);
+        Thread.sleep(10000l);
+    }    
+    ```
+    结果为：
+    ```
+    AdvanceSender3: User{userName='Leeyom', age=24}
+    AdvanceReceive3: User{userName='Leeyom', age=24}    
+    ```
+- 主题（Topic）交换机（exchange）模式可以根据`routing_key`匹配不同的队列：
+   - 配置队列，交换机，以及匹配规则。
+   - 队列`queueMessages`的匹配规则是`topic.#`，`#`表示相当于一个或者多个单词。例如，一个匹配模式是`agreements.eu.berlin.#`，那么，以 `agreements.eu.berlin` 开头的路由键都是可以的，`*`表示一个词。
+     ```java
+      @Bean
+      Binding bindingExchangeMessage(Queue queueMessage, TopicExchange exchange) {
+          return BindingBuilder.bind(queueMessage).to(exchange).with("topic.message");
+      }
+      @Bean
+      Binding bindingExchangeMessages(Queue queueMessages, TopicExchange exchange) {
+          return BindingBuilder.bind(queueMessages).to(exchange).with("topic.#");
+      }   
+     ```
+     所以queueMessages 同时匹配两个队列，queueMessage 只匹配“topic.message”队列。
+- 中间遇到一个异常：`Caused by: org.springframework.amqp.AmqpException: No method found for class [B`，一直报错，之前可以跑的测试用例也不行了，后面经过网上查找解决方案，`@RabbitListener`注解加到方法上，发现问题就没有了，但是我后面又复原代码，发现又没有异常了，比较奇怪，我怀疑应该是RabbitMQ配置问题。
 
 # 开发环境
 
