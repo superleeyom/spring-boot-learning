@@ -55,7 +55,7 @@
     - [x] [项目源码](#项目源码-7)
 - [x] [集成 MyBatis Druid 数据源](#集成-mybatis-druid-数据源)
   - [x] [单数据源](#单数据源)
-  - [x] [多数据源](#多数据源)
+  - [x] [多数据源](#多数据源-1)
 - [x] [集成 Redis 实现数据缓存和 Session 共享](#集成-redis-实现数据缓存和-session-共享)
   - [x] [集成Redis并简单上手](#集成redis并简单上手)
   - [x] [实现数据缓存](#实现数据缓存)
@@ -64,11 +64,194 @@
 - [x] [集成 RabbitMQ](#集成-rabbitmq)
   - [x] [简单使用](#简单使用)
   - [x] [进阶使用](#进阶使用)
-- [ ] 集成 MongoDB
+- [x] [集成 MongoDB](#集成-mongodb)
+  - [x] [MongoTemplate](#mongotemplate)
+  - [x] [MongoRepository](#mongorepository)
+  - [x] [多数据源](#多数据源-2)
 - [ ] Spring Boot 发送邮件
 - [ ] 集成 quartz
 - [ ] Spring Boot 集成测试和部署运维
 - [ ] 综合实战用户管理系统
+
+# 集成 MongoDB
+
+MongoDB是目前比较热门的非关系型数据库，传统的关系型数据库由：数据库（DataBase）、表（Table）、记录（Record）组成，而MongoDB则由：数据库（DataBase）、集合（Collection）、文档对象（Document）三个层次组成，但是这里的集合没有行和列的概念。MongoDB安装教程见：[《安装MongoDB》](http://www.leeyom.top/2017/11/12/linux-note/)。
+
+## MongoTemplate
+
+spring boot 中使用 MongoTemplate 可以对mongodb进行简单的操作，里面封装了常用的方法，只要将其注入到dao中即可。
+- 引入mongodb组件依赖：
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-mongodb</artifactId>
+  </dependency>  
+  ```
+- 配置mongodb用户名、密码、ip、端口、数据库：
+  ```properties
+  spring.data.mongodb.uri=mongodb://leeyom:root@10.211.55.5:27017/hello_mongodb
+  ```
+  集群配置：
+  ```properties
+  spring.data.mongodb.uri=mongodb://user:pwd@ip1:port1,ip2:port2/database
+  ```
+- 在 UserDao 接口的实现类 UserDaoImpl 中注入 `MongoTemplate` ，并实现一些简单的CRUD：
+  ```java
+  @Component
+  public class UserDaoImpl implements UserDao {
+
+      @Autowired
+      private MongoTemplate mongoTemplate;
+
+      @Override
+      public void saveUser(UserEntity user) {
+          mongoTemplate.save(user);
+      }
+
+      @Override
+      public UserEntity findUserByUserName(String userName) {
+          Query query = new Query(Criteria.where("userName").is(userName));
+          return mongoTemplate.findOne(query, UserEntity.class);
+      }
+
+      @Override
+      public void updateUser(UserEntity user) {
+          Query query = new Query(Criteria.where("id").is(user.getId()));
+          Update update = new Update();
+          update.set("userName", user.getUserName());
+          update.set("passWord", user.getPassWord());
+          mongoTemplate.updateFirst(query, update, UserEntity.class);
+      }
+
+      @Override
+      public void deleteUserById(Long id) {
+          Query query = new Query(Criteria.where("id").is(id));
+          mongoTemplate.remove(query, UserEntity.class);
+      }
+  }  
+  ```
+- 测试类：`com.leeyom.mongodb.UserDaoTest`，执行对应的测试方法，然后用 Robo 3T 来连接后直接图形化展示查看。
+- 项目地址：[spring-boot-mongodb](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mongodb)
+
+## MongoRepository
+
+`MongoRepository` 也可以对 mongodb 进行操作，我们需要创建一个 `UserRepository`，然后继承 `MongoRepository`，这样就可直接使用 `MongoRepository` 的内置方法。
+
+```java
+public interface UserRepository extends MongoRepository<UserEntity, Long> {
+
+    UserEntity findUserByUserName(String userName);
+
+    /**
+     * 分页查找
+     * @param pageable
+     * @return
+     */
+    Page<UserEntity> findAll(Pageable pageable);
+
+}
+```
+然后将 `UserRepository` 注入到指定的类中即可。
+
+## 多数据源
+
+这个配置 mongodb 多数据源和 配置 mybatis 多数据源有点相似，步骤如下：
+
+- 提前创建好两个数据库：`hello_mongodb_1`、`hello_mongodb_2`，然后配置`application.properties` 数据源信息：
+  ```properties
+  mongodb.one.uri=mongodb://root:root@10.211.55.5:27017
+  mongodb.one.database=hello_mongodb_1
+
+  mongodb.two.uri=mongodb://root:root@10.211.55.5:27017
+  mongodb.two.database=hello_mongodb_2
+  ```
+- 配置不同包路径下使用不同的数据源：
+  ```java
+  @Configuration
+  @EnableMongoRepositories(basePackages = "com.leeyom.mongodb.repository.one",
+          mongoTemplateRef = OneMongoDbConfig.MONGO_TEMPLATE)
+  public class OneMongoDbConfig {
+      protected static final String MONGO_TEMPLATE = "oneMongoTemplate";
+  }  
+  ```
+  ```java
+  @Configuration
+  @EnableMongoRepositories(basePackages = "com.leeyom.mongodb.repository.two",
+          mongoTemplateRef = TwoMongoDbConfig.MONGO_TEMPLATE)
+  public class TwoMongoDbConfig {
+      protected static final String MONGO_TEMPLATE = "twoMongoTemplate";
+  }  
+  ```
+- 读取配置信息封装:
+  ```java
+  @ConfigurationProperties(prefix = "mongodb")
+  public class MultipleMongoProperties {
+
+      MongoProperties one = new MongoProperties();
+      MongoProperties two = new MongoProperties();
+
+      public MongoProperties getOne() {
+          return one;
+      }
+
+      public void setOne(MongoProperties one) {
+          this.one = one;
+      }
+
+      public MongoProperties getTwo() {
+          return two;
+      }
+
+      public void setTwo(MongoProperties two) {
+          this.two = two;
+      }
+  }  
+  ```
+- `MongoTemplate` 在根据包路径配置注入到对应的包下：
+  ```java
+  @Configuration
+  public class MultipleMongoConfig {
+
+      @Autowired
+      private MultipleMongoProperties mongoProperties;
+
+      @Primary
+      @Bean(name = OneMongoDbConfig.MONGO_TEMPLATE)
+      public MongoTemplate oneMongoTemplate() throws Exception {
+          return new MongoTemplate(oneFactory(this.mongoProperties.getOne()));
+      }
+
+      @Bean
+      @Qualifier(TwoMongoDbConfig.MONGO_TEMPLATE)
+      public MongoTemplate twoMongoTemplate() throws Exception {
+          return new MongoTemplate(twoFactory(this.mongoProperties.getTwo()));
+      }
+
+      @Bean
+      @Primary
+      public MongoDbFactory oneFactory(MongoProperties mongo) throws Exception {
+          MongoClient client = new MongoClient(new MongoClientURI(mongoProperties.getOne().getUri()));
+          return new SimpleMongoDbFactory(client, mongoProperties.getOne().getDatabase());
+      }
+
+      @Bean
+      public MongoDbFactory twoFactory(MongoProperties mongo) throws Exception {
+          MongoClient client = new MongoClient(new MongoClientURI(mongoProperties.getTwo().getUri()));
+          return new SimpleMongoDbFactory(client, mongoProperties.getTwo().getDatabase());
+      }
+  }  
+  ```
+- 创建两个库分别对应的对象和 `OneRepository`、`TwoRepository`，然后都继承 `MongoRepository`，例如：
+  ```java
+  public interface OneRepository extends MongoRepository<UserEntity, Long> {
+
+      UserEntity findUserByUserName(String userName);
+  }  
+  ```
+- 在 spring boot 应用的启动类中，添加`@EnableConfigurationProperties(MultipleMongoProperties.class)`注解，不然 properties 中自定义的属性将不会生效。
+
+- 在需要的地方注入 `OneRepository`、`TwoRepository`，便可以操作指定的 mongodb 数据源了，具体的测试类这里就不贴了，源码里可以看到。
+- 项目地址：[spring-boot-mongodb-multi](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-mongodb-multi)
 
 # 集成 RabbitMQ
 
