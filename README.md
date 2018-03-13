@@ -68,11 +68,183 @@
   - [x] [MongoTemplate](#mongotemplate)
   - [x] [MongoRepository](#mongorepository)
   - [x] [多数据源](#多数据源-2)
-- [ ] Spring Boot 发送邮件
+- [x] [Spring Boot 发送邮件](#spring-boot-发送邮件)
 - [ ] 集成 quartz
 - [ ] Spring Boot 集成测试和部署运维
 - [ ] 综合实战用户管理系统
 
+# Spring Boot 发送邮件
+
+平常我们都是用 JavaMail 相关 API 发送邮件，但是 spring boot 给我们封装了更为便利的 API 用于邮件发送，其中有个组件是 `spring-boot-starter-mail `，下面简单的理一下怎么用它的 API 发送邮件。
+
+- pom 文件中添加 `spring-boot-starter-mail` 依赖：
+  ```xml
+  <!--邮件发送-->
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+  </dependency>  
+  ```
+- 配置发送邮箱的账号和授权密码以及host，其中密码一般不是邮件的授权密码，而不是登录密码。
+  ```properties
+  # 163 email
+  spring.mail.host=smtp.163.com
+  spring.mail.username=xxxx@163.com
+  spring.mail.password=你的邮箱授权密码，不是登录密码
+  spring.mail.default-encoding=UTF-8
+  spring.mail.properties.mail.smtp.auth=true
+  spring.mail.properties.mail.smtp.starttls.enable=true
+  spring.mail.properties.mail.smtp.starttls.reuired=true  
+  ```
+- 编写邮件发送类：`MailServiceImpl`，在该类中注入 `JavaMailSender`，这个类封装了常用的邮件发送API。
+  ```java
+  @Component
+  public class MailServiceImpl implements MailService {
+
+      private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+      @Autowired
+      private JavaMailSender javaMailSender;
+
+      @Value("${spring.mail.username}")
+      private String from;
+
+      /**
+       * 发送简单的文本邮件
+       * @param to      接收人
+       * @param subject 主题
+       * @param content 内容
+       */
+      @Override
+      public void sendSimpleMail(String to, String subject, String content) {
+          SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+          simpleMailMessage.setFrom(from);
+          simpleMailMessage.setTo(to);
+          simpleMailMessage.setSubject(subject);
+          simpleMailMessage.setText(content);
+          try {
+              javaMailSender.send(simpleMailMessage);
+              logger.info("发送成功！");
+          } catch (Exception e) {
+              logger.error("发送失败！", e);
+          }
+      }
+
+      /**
+       * 发送html格式的邮件
+       * @param to      接收人
+       * @param subject 主题
+       * @param content 内容
+       */
+      @Override
+      public void sendHtmlMail(String to, String subject, String content) {
+
+          MimeMessage message = javaMailSender.createMimeMessage();
+          try {
+              MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
+              messageHelper.setTo(to);
+              messageHelper.setSubject(subject);
+              messageHelper.setText(content, true);
+              messageHelper.setFrom(from);
+              javaMailSender.send(message);
+              logger.info("html邮件发送成功");
+          } catch (Exception e) {
+              logger.error("发送失败~~~", e);
+          }
+      }
+
+      /**
+       * 发送带附件的邮件
+       * @param to       接收人
+       * @param subject  主题
+       * @param content  内容
+       * @param filePath 文件路径
+       */
+      @Override
+      public void sendAttachmentsMail(String to, String subject, String content, String filePath) {
+          MimeMessage message = javaMailSender.createMimeMessage();
+          try {
+              MimeMessageHelper helper = new MimeMessageHelper(message, true);
+              helper.setFrom(from);
+              helper.setTo(to);
+              helper.setSubject(subject);
+              helper.setText(content, true);
+
+              FileSystemResource file = new FileSystemResource(new File(filePath));
+              String fileName = file.getFilename();
+              //添加附件
+              helper.addAttachment(fileName, file);
+
+              javaMailSender.send(message);
+              logger.info("带附件的邮件已经发送。");
+          } catch (MessagingException e) {
+              logger.error("发送带附件的邮件时发生异常！", e);
+          }
+      }
+  }  
+  ```
+- 简单的测试：
+  ```java
+  public class SpringBootEmailApplicationTests {
+
+      @Autowired
+      private MailService mailService;
+      @Autowired
+      private TemplateEngine templateEngine;
+
+      /**
+       * 测试发送简单邮箱
+       */
+      @Test
+      public void testSimpleEmail() {
+          mailService.sendSimpleMail("leeyomwang@qq.com", "测试spring boot的发送简单邮件", "1111111");
+      }
+
+      /**
+       * 测试发送html邮件
+       */
+      @Test
+      public void testHtmlEmail() {
+          String context = "<html>\n" +
+                  "<body>\n" +
+                  "    <h3>今天晚上吃啥呢？</h3>\n" +
+                  "</body>\n" +
+                  "</html>";
+          mailService.sendHtmlMail("leeyomwang@qq.com", "测试spring boot的发送html邮件", context);
+      }
+
+      /**
+       * 测试发送带附件的邮件
+       */
+      @Test
+      public void testAttachmentFileEmail() {
+          String filePath = "/Users/leeyom/Downloads/consumer.xml";
+          mailService.sendAttachmentsMail("leeyomwang@qq.com",
+          "测试spring boot的发送带附件的邮件", "111111111！", filePath);
+      }
+
+      /**
+       * 测试发送模板邮件
+       */
+      @Test
+      public void testSendTemplatesEmail() {
+          Context context = new Context();
+          context.setVariable("id", "1");
+          String emailContent = templateEngine.process("emailTemplate", context);
+          mailService.sendHtmlMail("leeyomwang@qq.com", "测试spring boot的发送模板邮件", emailContent);
+      }
+
+  }
+  ```
+- 在发送的时候，如果报如下的异常：
+  ```
+  org.springframework.mail.MailSendException:
+  Failed messages: com.sun.mail.smtp.SMTPSendFailedException:
+  554 DT:SPM 163 smtp8,DMCowACHEMvH1adakFYxKA--.26575S3 1520948680,
+  please see http://mail.163.com/help/help_spam_16.htm?ip=120.194.143.76&hostid=smtp8&time=1520948680
+  ```
+  引发次问题是因为此邮件触发了163邮箱服务器反垃圾规则，我发送好几次都失败了，邮件内容改成这种“1111111”才能成功，好无语~
+- 项目源码：[spring-boot-email](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-email)
 # 集成 MongoDB
 
 MongoDB是目前比较热门的非关系型数据库，传统的关系型数据库由：数据库（DataBase）、表（Table）、记录（Record）组成，而MongoDB则由：数据库（DataBase）、集合（Collection）、文档对象（Document）三个层次组成，但是这里的集合没有行和列的概念。MongoDB安装教程见：[《安装MongoDB》](http://www.leeyom.top/2017/11/12/linux-note/)。
