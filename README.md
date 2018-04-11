@@ -140,7 +140,7 @@
 
 ## 使用 quartz 组件
 
-- Spring Boot 2.0 版本才开始支持 quartz 组件，引入 quartz 组件依赖：
+- Spring Boot 2.0 版本才开始支持 quartz 组件，引入 quartz 组件依赖：
   ```xml
   <dependency>
       <groupId>org.springframework.boot</groupId>
