@@ -1,7 +1,6 @@
 <p align="center"><img src="http://image.leeyom.top/blog/180210/3IA3E13f3D.png"></p>
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/devTool-IDEA-yellow.svg" alt=""></a>
-  <a href="#"><img src="https://travis-ci.org/Alamofire/Alamofire.svg?branch=master" alt=""></a>
   <a href="#"><img src="https://img.shields.io/packagist/l/doctrine/orm.svg" alt="LICENSE"></a>
   <a href="#"><img src="https://img.shields.io/badge/platform-OSX%7CWin%7CLinux-blue.svg" alt=""></a>
   <a href="#"><img src="https://badges.frapsoft.com/os/v1/open-source.svg?v=103" alt=""></a>   	
@@ -69,10 +68,125 @@
   - [x] [MongoRepository](#mongorepository)
   - [x] [多数据源](#多数据源-2)
 - [x] [Spring Boot 发送邮件](#spring-boot-发送邮件)
-- [ ] 集成 quartz
+- [x] [集成 quartz](#集成-quartz)
+  - [x] [内置定时](#内置定时)
+  - [x] [使用 quartz 组件](#使用-quartz-组件)
 - [ ] Spring Boot 集成测试和部署运维
-- [ ] 综合实战用户管理系统
 
+
+# 集成 quartz
+
+## 内置定时
+
+- 内置的定时只需要引入 `Spring Boot Starter`即可，该包中内置了定时：
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+  </dependency>  
+  ```
+- 启动类使用注解`@EnableScheduling`开启定时：
+  ```java
+  @SpringBootApplication
+  @EnableScheduling
+  public class SpringBootQuartzApplication {
+
+  	public static void main(String[] args) {
+  		SpringApplication.run(SpringBootQuartzApplication.class, args);
+  	}
+  }  
+  ```
+- 创建定时任务实现类，使用`@Scheduled`注解设置定时，process()方法每隔6秒执行一次：
+  ```java
+  @Component
+  public class SchedulerTask {
+      private int count = 0;
+      /**
+       * 每隔6秒打印一次
+       */
+      @Scheduled(cron = "*/6 * * * * ?")
+      public void process() {
+          System.out.println("this is scheduler task runing  " + (count++));
+      }
+
+  }  
+  ```
+  当然，还有另外一种设置方式：
+  ```java
+  @Scheduled(fixedRate = 6000)
+    public void reportCurrentTime() {
+        System.out.println("date：" + dateFormat.format(new Date()));
+    }
+  ```
+- `@Scheduled` 注解属性说明：
+    - `@Scheduled(fixedRate = 6000)` ：上一次开始执行时间点之后 6 秒再执行。
+    - `@Scheduled(fixedDelay = 6000)`：上一次执行完毕时间点之后 6 秒再执行。
+    - `@Scheduled(initialDelay=1000, fixedRate=6000)` ：第一次延迟 1 秒后执行，之后按 fixedRate 的规则每 6 秒执行一次。
+    - `@Scheduled(cron="*/6 * * * * ?")`：cron 表达式一共7位，最后一位是年，Spring Boot 只需要设置6位：
+      - 第一位，表示秒，取值 0-59；
+      - 第二位，表示分，取值 0-59；
+      - 第三位，表示小时，取值 0-23；
+      - 第四位，日期天/日，取值 1-31；
+      - 第五位，日期月份，取值 1-12；
+      - 第六位，星期，取值 1-7，星期一、星期二…；
+      - 第七位，年份，可以留空，取值 1970-2099。
+    - `cron`表达式 中，还有一些特殊的符号，含义如下：
+      - （\*）星号：可以理解为每的意思，每秒、每分、每天、每月、每年……。
+      - （?）问号：问号只能出现在日期和星期这两个位置，表示这个位置的值不确定，每天 3 点执行，所以第六位星期的位置是不需要关注的，就是不确定的值。
+      - （-）减号：表达一个范围，如在小时字段中使用“10-12”，则表示从 10~12 点，即 10、11、12。
+      - （,）逗号：表达一个列表值，如在星期字段中使用“1、2、4”，则表示星期一、星期二、星期四。
+      - （/）斜杠：如 x/y，x 是开始值，y 是步长，比如在第一位（秒） 0/15 就是，从 0 秒开始，每 15 秒，最后就是 0、15、30、45、60。
+- 示例代码：[spring-boot-quartz](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-quartz)
+
+## 使用 quartz 组件
+
+- Spring Boot 2.0 版本才开始支持 quartz 组件，引入 quartz 组件依赖：
+  ```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-quartz</artifactId>
+  </dependency>  
+  ```
+- 创建一个 job（任务），该 job 继承 `QuartzJobBean`，在重写`executeInternal（JobExecutionContext context）`方法中可以写需要处理的定时任务代码 ：
+  ```java
+  public class SampleJob extends QuartzJobBean {
+
+      private String name;
+
+      public void setName(String name) {
+          this.name = name;
+      }
+
+      @Override
+      protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+          System.out.println(String.format("Hello %s!", this.name));
+      }
+  }
+  ```
+- 构建 `JobDetail`、`JobTrigger`、`scheduleBuilder`，最后使用 `Scheduler` 启动定时任务：
+  ```java
+  @Configuration
+  public class SampleScheduler {
+
+      @Bean
+      public JobDetail sampleJobDetail() {
+          return JobBuilder.newJob(SampleJob.class).withIdentity("sampleJob")
+                  .usingJobData("name", "World").storeDurably().build();
+      }
+
+      @Bean
+      public Trigger sampleJobTrigger() {
+          SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
+                  .withIntervalInSeconds(2).repeatForever();
+
+          return TriggerBuilder.newTrigger().forJob(sampleJobDetail())
+                  .withIdentity("sampleTrigger").withSchedule(scheduleBuilder).build();
+      }
+
+  }
+  ```
+- 启动项目后每隔两秒输出：Hello World!
+- 示例代码：[spring-boot-quartz-advance](https://github.com/wangleeyom/spring-boot-learning/tree/master/spring-boot-quartz-advance)
 # Spring Boot 发送邮件
 
 平常我们都是用 JavaMail 相关 API 发送邮件，但是 spring boot 给我们封装了更为便利的 API 用于邮件发送，其中有个组件是 `spring-boot-starter-mail `，下面简单的理一下怎么用它的 API 发送邮件。
