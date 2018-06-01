@@ -71,8 +71,73 @@
 - [x] [集成 quartz](#集成-quartz)
   - [x] [内置定时](#内置定时)
   - [x] [使用 quartz 组件](#使用-quartz-组件)
-- [ ] Spring Boot 集成测试和部署运维
+- [x] [Spring Boot 集成测试和部署运维](#spring-boot-集成测试和部署运维)
 
+# Spring Boot 集成测试和部署运维
+
+- 测试用的类，需要在类的头部添加 `@RunWith(SpringRunner.class)` 和 `@SpringBootTest` 注解。
+  ```java
+  @RunWith(SpringRunner.class)
+  @SpringBootTest
+  public class TestUserService {
+
+  }  
+  ```
+- 测试常用的注解和类：
+  - `@Test`：Junit 常用注解，这个大家都经常用。
+  - `Assert`：中文翻译“断言”、“断定”，它断定某一个实际的运行值和预期想一样，否则就抛出异常。
+    ```java
+    @Test
+    public void testAssert() {
+        //验证结果是否为空
+        Assert.assertNotNull(userService.getUser());
+        //验证结果是否相等
+        Assert.assertEquals("I am leeyom", userService.getUser());
+        //验证条件是否成立
+        Assert.assertFalse(1 + 1 > 3);
+        //验证对象是否相等
+        Assert.assertSame(userService, userService);
+        int status = 404;
+        //验证结果集，提示
+        Assert.assertFalse("错误，正确的返回值为200", status != 200);
+        String[] expectedOutput = {"apple", "mango", "grape"};
+        String[] methodOutput = {"apple", "mango", "grape1"};
+        //验证数组是否相同
+        Assert.assertArrayEquals(expectedOutput, methodOutput);
+
+    }    
+    ```
+  - `MockMvc`：方便对 web 接口进行测试，不需要用 postman 这类工具：
+    ```java
+    @RunWith(SpringRunner.class)
+    @SpringBootTest
+    public class TestMockMvc {
+
+        private MockMvc mockMvc;
+
+        @Before
+        public void setUp() throws Exception {
+            mockMvc = MockMvcBuilders.standaloneSetup(new HelloWorldHandler()).build();
+        }
+
+        @Test
+        public void getHello() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders.get("/hello")
+                    .param("name", "leeyom")
+                    .accept(MediaType.APPLICATION_JSON_UTF8))
+                    .andExpect(status().isOk())
+                    .andDo(MockMvcResultHandlers.print())
+                    .andReturn();
+        }
+
+    }
+    ```
+- 对应批量的启动服务的脚本，可以参考：[service.sh](https://github.com/wangleeyom/spring-boot-learning/blob/master/spring-boot-test-operation/src/main/resources/service.sh)
+  - 正式环境部署，所有的服务的jar部署在 `/application/provider` 目录下，该文件夹下有个 `service.sh` 脚本，用于启动，停止，重启服务。
+    - 启动所有jar程序：`sh service.sh start all`
+    - 停止所有jar程序：`sh service.sh stop all`
+    - 重启所有jar程序：`sh service.sh restart all`
+    - 单独启动、停止、重启某个jar程序：把最后面的all替换为某个jar程序的代码即可，比如：`sh service.sh restart advertising`
 
 # 集成 quartz
 
