@@ -978,9 +978,13 @@ public class MyWebConfiguration {
     public FilterRegistrationBean testFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new MyFilter());
+        // 需要过滤的 url
         registration.addUrlPatterns("/*");
+        // 初始化的参数
         registration.addInitParameter("paramName", "paramValue");
+        // 过滤器的名称
         registration.setName("MyFilter");
+        // 过滤器的执行顺序，order 从小到大顺序执行
         registration.setOrder(1);
         return registration;
     }
